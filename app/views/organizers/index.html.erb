@@ -1,0 +1,73 @@
+<div class="mx-auto">
+    <div class="p-8 max-w-6xl mx-auto space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold">Daftar Penyelenggara Magang</h1>
+        <div class="badge badge-primary text-lg p-4">
+        Total: <%= @total_organizers || 0 %>
+        </div>
+    </div>
+    </div>
+
+    <%= turbo_frame_tag "organizers_table" do %>
+    <div class="overflow-x-auto shadow-xl">
+    <table class="table table-zebra w-full">
+        <!-- head -->
+        <thead>
+        <tr>
+            <th>Penyelenggara</th>
+            <th>Lokasi</th>
+            <th>Jumlah lowowngan</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- row 1 -->
+        <% (@organizers || []).each do |org| %>
+        <tr>
+            <td>
+            <div class="flex items-center gap-3">
+                <div class="avatar">
+                <div class="mask mask-squircle h-12 w-12">
+                    <img
+                    class = "object-scale-down"
+                    src=<%= org.logo_url%>
+                    alt="Organizer's logo" />
+                </div>
+                </div>
+                <div>
+                <div class="font-bold"><%= org.name %></div>
+                <div class="badge badge-ghost text-sm opacity-50"><%= org.organizable_type%></div>
+                </div>
+            </div>
+            </td>
+            <td>
+                <%= org.city&.name %>
+            </td>
+            <td> <%= org.total_active_vacancies || 0%> </td>
+            <th>
+            <button class="btn btn-ghost btn-xs">details</button>
+            </th>
+        </tr>
+        <% end %>
+        </tbody>
+        <!-- foot -->
+        <tfoot>
+        <tr>
+            <th>Penyelenggara</th>
+            <th>Lokasi</th>
+            <th>Jumlah Lowongan</th>
+            <th></th>
+        </tr>
+        </tfoot>
+    </table>
+        <div class="flex flex-col items-center">
+            <div class="p-3">
+            <%== @pagy.series_nav %>
+            </div>
+            <div class="p-3">
+            <%== @pagy.info_tag %>
+            </div>
+        </div>
+    </div>
+    <% end %>
+</div>

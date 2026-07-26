@@ -1,0 +1,31 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  organizer: one
+  city: one
+  study_program: one
+  position_name: MyString
+  quantity_needed: 1
+  approved_quantity: 1
+  total_applications: 1
+  task_description: MyText
+  working_days_per_week: 1
+  latitude: 9.99
+  longitude: 9.99
+  address: MyText
+  published_at: 2026-07-25 16:25:54
+
+two:
+  organizer: two
+  city: two
+  study_program: two
+  position_name: MyString
+  quantity_needed: 1
+  approved_quantity: 1
+  total_applications: 1
+  task_description: MyText
+  working_days_per_week: 1
+  latitude: 9.99
+  longitude: 9.99
+  address: MyText
+  published_at: 2026-07-25 16:25:54
