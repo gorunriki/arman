@@ -88,11 +88,13 @@ ActiveRecord::Base.transaction do
     vacancy.assign_attributes(
       organizer: organizer,
       city: city,
-      study_program: main_study_program,
+      primary_study_program: main_study_program,
       position_name: item['positionName'],
       quantity_needed: item['quantityNeeded'] || 0,
       approved_quantity: item['approvedQuantity'] || 0,
       total_applications: item['totalApplications'] || 0,
+      competitive_score: item['competitiveScore'],
+      opportunity_score: item['opportunityScore'],
       task_description: item['taskDescription'],
       working_days_per_week: item['workingDaysPerWeek'],
       education_levels: item['educationLevels'] || [],
@@ -119,6 +121,7 @@ ActiveRecord::Base.transaction do
         vacancy.study_programs << sp unless vacancy.study_programs.exists?(sp.id)
       end
     end
+    vacancy.study_programs << main_study_program if main_study_program && !vacancy.study_programs.exists?(main_study_program.id)
 
     puts "  [#{index + 1}/#{vacancies_list.size}] ✅ Imported: #{vacancy.position_name} (#{organizer&.name})"
   end

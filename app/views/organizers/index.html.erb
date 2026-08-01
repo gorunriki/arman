@@ -1,73 +1,209 @@
-<div class="mx-auto">
-    <div class="p-8 max-w-6xl mx-auto space-y-6">
-    <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold">Daftar Penyelenggara Magang</h1>
-        <div class="badge badge-primary text-lg p-4">
-        Total: <%= @total_organizers || 0 %>
-        </div>
-    </div>
-    </div>
+<% content_for :title, "Penyelenggara Magang" %>
 
-    <%= turbo_frame_tag "organizers_table" do %>
-    <div class="overflow-x-auto shadow-xl">
-    <table class="table table-zebra w-full">
-        <!-- head -->
-        <thead>
-        <tr>
-            <th>Penyelenggara</th>
-            <th>Lokasi</th>
-            <th>Jumlah lowowngan</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- row 1 -->
-        <% (@organizers || []).each do |org| %>
-        <tr>
-            <td>
-            <div class="flex items-center gap-3">
-                <div class="avatar">
-                <div class="mask mask-squircle h-12 w-12">
-                    <img
-                    class = "object-scale-down"
-                    src=<%= org.logo_url%>
-                    alt="Organizer's logo" />
-                </div>
-                </div>
-                <div>
-                <div class="font-bold"><%= org.name %></div>
-                <div class="badge badge-ghost text-sm opacity-50"><%= org.organizable_type%></div>
-                </div>
-            </div>
-            </td>
-            <td>
-                <%= org.city&.name %>
-            </td>
-            <td> <%= org.total_active_vacancies || 0%> </td>
-            <th>
-            <button class="btn btn-ghost btn-xs">details</button>
-            </th>
-        </tr>
-        <% end %>
-        </tbody>
-        <!-- foot -->
-        <tfoot>
-        <tr>
-            <th>Penyelenggara</th>
-            <th>Lokasi</th>
-            <th>Jumlah Lowongan</th>
-            <th></th>
-        </tr>
-        </tfoot>
-    </table>
-        <div class="flex flex-col items-center">
-            <div class="p-3">
-            <%== @pagy.series_nav %>
-            </div>
-            <div class="p-3">
-            <%== @pagy.info_tag %>
-            </div>
+<div class="mx-auto w-full max-w-6xl pb-12">
+  <header class="mb-6 overflow-hidden rounded-3xl bg-primary text-primary-content shadow-sm">
+    <div class="relative px-6 py-8 sm:px-10 sm:py-10">
+      <div class="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-primary-content/10"></div>
+      <div class="pointer-events-none absolute -bottom-24 right-24 size-48 rounded-full bg-primary-content/5"></div>
+
+      <div class="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <div class="max-w-2xl">
+          <div class="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider opacity-80">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M6 21V7l6-4 6 4v14M9 10h.01M9 14h.01M9 18h.01M15 10h.01M15 14h.01M15 18h.01" />
+            </svg>
+            Mitra Magang
+          </div>
+          <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Daftar Penyelenggara Magang</h1>
+          <p class="mt-3 max-w-xl text-sm leading-6 opacity-80 sm:text-base">
+            Temukan instansi dan perusahaan penyedia kesempatan magang dari berbagai daerah.
+          </p>
         </div>
+
+        <div class="stats bg-primary-content/10 text-primary-content shadow-none backdrop-blur-sm">
+          <div class="stat px-5 py-3">
+            <div class="stat-title text-xs font-medium text-primary-content/70">Total penyelenggara</div>
+            <div class="stat-value text-3xl"><%= number_with_delimiter(@total_organizers || 0) %></div>
+          </div>
+        </div>
+      </div>
     </div>
-    <% end %>
+  </header>
+
+  <section class="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm" aria-labelledby="organizers-list-title">
+      <div class="flex items-center justify-between border-b border-base-300 px-5 py-4 sm:px-6">
+        <div>
+          <h2 id="organizers-list-title" class="font-semibold text-base-content">Semua penyelenggara</h2>
+          <p class="mt-0.5 text-xs text-base-content/60">Cari dan saring penyelenggara sesuai kebutuhanmu</p>
+        </div>
+      </div>
+
+      <%= form_with url: organizers_path,
+                    method: :get,
+                    class: "grid gap-3 border-b border-base-300 bg-base-200/30 p-4 sm:grid-cols-2 lg:grid-cols-[minmax(16rem,1fr)_minmax(10rem,0.65fr)_minmax(10rem,0.65fr)_minmax(11rem,0.65fr)_auto] sm:p-5",
+                    data: {
+                      controller: "filter-form",
+                      turbo_frame: "organizers_table",
+                      action: "submit->filter-form#cancelPending"
+                    } do |form| %>
+        <label class="input input-bordered flex w-full items-center gap-2 bg-base-100">
+          <svg class="size-4 shrink-0 text-base-content/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path stroke-linecap="round" d="m20 20-4-4" />
+          </svg>
+          <%= form.search_field :q,
+                                value: params[:q],
+                                placeholder: "Cari penyelenggara...",
+                                class: "min-w-0 grow",
+                                autocomplete: "off",
+                                aria: { label: "Cari nama penyelenggara" },
+                                data: { action: "input->filter-form#search" } %>
+        </label>
+
+        <%= form.select :city_id,
+                        options_from_collection_for_select(@cities, :id, :name, params[:city_id]),
+                        { include_blank: "Semua kota" },
+                        class: "select select-bordered w-full bg-base-100",
+                        aria: { label: "Filter berdasarkan kota" },
+                        data: { action: "change->filter-form#submit" } %>
+
+        <%= form.select :organizer_type,
+                        options_for_select(@organizer_types, params[:organizer_type]),
+                        { include_blank: "Semua jenis" },
+                        class: "select select-bordered w-full bg-base-100",
+                        aria: { label: "Filter berdasarkan jenis penyelenggara" },
+                        data: { action: "change->filter-form#submit" } %>
+
+        <%= form.select :sort,
+                        options_for_select([
+                          [ "Nama A–Z", "" ],
+                          [ "Nama Z–A", "name_desc" ],
+                          [ "Lowongan terbanyak", "vacancies_desc" ],
+                          [ "Lowongan paling sedikit", "vacancies_asc" ]
+                        ], params[:sort]),
+                        {},
+                        class: "select select-bordered w-full bg-base-100",
+                        aria: { label: "Urutkan penyelenggara" },
+                        data: { action: "change->filter-form#submit" } %>
+
+        <div class="flex gap-2 sm:col-span-2 lg:col-span-1">
+          <%= form.submit "Cari", class: "btn btn-primary flex-1 lg:hidden" %>
+          <% if @filters_active %>
+            <%= link_to "Reset",
+                        organizers_path,
+                        class: "btn btn-ghost flex-1 lg:flex-none",
+                        data: { turbo_frame: "_top" } %>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%= turbo_frame_tag "organizers_table" do %>
+        <div class="flex items-center justify-between border-b border-base-300 px-5 py-3 sm:px-6">
+          <p class="text-xs text-base-content/60">
+            <%= number_with_delimiter(@pagy.count) %> penyelenggara ditemukan
+          </p>
+          <span class="badge badge-ghost hidden sm:inline-flex">
+            Halaman <%= @pagy.page %> dari <%= @pagy.pages %>
+          </span>
+        </div>
+
+      <% if @organizers.any? %>
+        <div class="overflow-x-auto">
+          <table class="table w-full">
+            <thead class="bg-base-200/70 text-xs uppercase tracking-wide text-base-content/60">
+              <tr>
+                <th scope="col" class="pl-5 sm:pl-6">Penyelenggara</th>
+                <th scope="col" class="hidden sm:table-cell">Lokasi</th>
+                <th scope="col" class="text-center">Lowongan aktif</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-base-200">
+              <% @organizers.each do |organizer| %>
+                <tr class="transition-colors hover:bg-base-200/50">
+                  <td class="pl-5 sm:pl-6">
+                    <div class="flex min-w-0 items-center gap-3 sm:gap-4">
+                      <div class="avatar shrink-0">
+                        <div class="flex size-12 items-center justify-center overflow-hidden rounded-xl border border-base-300 bg-base-200 sm:size-14">
+                          <% if organizer.logo_url.present? %>
+                            <%= image_tag organizer.logo_url,
+                                          alt: "Logo #{organizer.name}",
+                                          class: "size-full object-contain p-1.5",
+                                          loading: "lazy",
+                                          decoding: "async" %>
+                          <% else %>
+                            <span class="text-lg font-bold text-base-content/50" aria-hidden="true">
+                              <%= organizer.name.first&.upcase %>
+                            </span>
+                          <% end %>
+                        </div>
+                      </div>
+
+                      <div class="min-w-0">
+                        <p class="truncate font-semibold text-base-content"><%= organizer.name %></p>
+                        <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                          <span class="badge badge-ghost badge-sm max-w-full truncate">
+                            <%= organizer_type_label(organizer.organizable_type) %>
+                          </span>
+                          <span class="max-w-40 truncate text-xs text-base-content/60 sm:hidden">
+                            <%= organizer.city&.name || "Lokasi belum tersedia" %>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="hidden text-sm text-base-content/70 sm:table-cell">
+                    <div class="flex items-center gap-2">
+                      <svg class="size-4 shrink-0 text-base-content/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6-5.33 6-12a6 6 0 1 0-12 0c0 6.67 6 12 6 12Z" />
+                        <circle cx="12" cy="9" r="2" />
+                      </svg>
+                      <span><%= organizer.city&.name || "Belum tersedia" %></span>
+                    </div>
+                  </td>
+
+                  <td class="text-center">
+                    <% active_vacancies = organizer.total_active_vacancies %>
+                    <span class="badge <%= active_vacancies.positive? ? "badge-success" : "badge-ghost" %> badge-sm whitespace-nowrap sm:badge-md">
+                      <%= number_with_delimiter(active_vacancies) %>
+                      <span class="hidden sm:inline">lowongan</span>
+                    </span>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <footer class="flex flex-col items-center justify-between gap-3 border-t border-base-300 px-4 py-4 sm:flex-row sm:px-6">
+          <div class="order-2 text-center text-xs text-base-content/60 sm:order-1 sm:text-left">
+            <%== @pagy.info_tag %>
+          </div>
+          <div class="order-1 sm:order-2" aria-label="Navigasi halaman">
+            <%== @pagy.series_nav %>
+          </div>
+        </footer>
+      <% else %>
+        <div class="flex flex-col items-center px-6 py-16 text-center">
+          <div class="mb-4 flex size-14 items-center justify-center rounded-2xl bg-base-200 text-base-content/50">
+            <svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M6 21V7l6-4 6 4v14M9 10h.01M9 14h.01M15 10h.01M15 14h.01" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-base-content">
+            <%= @filters_active ? "Penyelenggara tidak ditemukan" : "Belum ada penyelenggara" %>
+          </h3>
+          <p class="mt-1 max-w-sm text-sm text-base-content/60">
+            <%= @filters_active ? "Coba ubah kata pencarian atau filter yang digunakan." : "Data penyelenggara magang akan ditampilkan di sini setelah tersedia." %>
+          </p>
+          <% if @filters_active %>
+            <%= link_to "Reset pencarian",
+                        organizers_path,
+                        class: "btn btn-primary btn-sm mt-5",
+                        data: { turbo_frame: "_top" } %>
+          <% end %>
+        </div>
+      <% end %>
+      <% end %>
+  </section>
 </div>

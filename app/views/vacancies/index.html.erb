@@ -1,0 +1,187 @@
+<% content_for :title, "Lowongan Magang" %>
+
+<div class="mx-auto w-full max-w-6xl pb-12">
+  <header class="mb-6 overflow-hidden rounded-3xl bg-secondary text-secondary-content shadow-sm">
+    <div class="relative px-6 py-8 sm:px-10 sm:py-10">
+      <div class="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-secondary-content/10"></div>
+      <div class="pointer-events-none absolute -bottom-24 right-24 size-48 rounded-full bg-secondary-content/5"></div>
+
+      <div class="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <div class="max-w-2xl">
+          <div class="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider opacity-80">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="3" y="7" width="18" height="13" rx="2" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2" />
+            </svg>
+            Peluang Magang
+          </div>
+          <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Temukan Lowongan Magang</h1>
+          <p class="mt-3 max-w-xl text-sm leading-6 opacity-80 sm:text-base">
+            Jelajahi posisi magang aktif dari berbagai penyelenggara dan daerah.
+          </p>
+        </div>
+
+        <div class="stats bg-secondary-content/10 text-secondary-content shadow-none backdrop-blur-sm">
+          <div class="stat px-5 py-3">
+            <div class="stat-title text-xs font-medium text-secondary-content/70">Lowongan aktif</div>
+            <div class="stat-value text-3xl"><%= number_with_delimiter(@total_vacancies) %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm" aria-labelledby="vacancies-list-title">
+    <div class="border-b border-base-300 px-5 py-4 sm:px-6">
+      <h2 id="vacancies-list-title" class="font-semibold text-base-content">Daftar lowongan</h2>
+      <p class="mt-0.5 text-xs text-base-content/60">Cari posisi yang sesuai dengan minat dan pendidikanmu</p>
+    </div>
+
+    <%= form_with url: vacancies_path,
+                  method: :get,
+                  class: "grid gap-3 border-b border-base-300 bg-base-200/30 p-4 sm:grid-cols-2 lg:grid-cols-[minmax(16rem,1fr)_minmax(10rem,0.65fr)_minmax(10rem,0.65fr)_minmax(11rem,0.65fr)_auto] sm:p-5",
+                  data: {
+                    controller: "filter-form",
+                    turbo_frame: "vacancies_list",
+                    action: "submit->filter-form#cancelPending"
+                  } do |form| %>
+      <label class="input input-bordered flex w-full items-center gap-2 bg-base-100">
+        <svg class="size-4 shrink-0 text-base-content/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path stroke-linecap="round" d="m20 20-4-4" />
+        </svg>
+        <%= form.search_field :q,
+                              value: params[:q],
+                              placeholder: "Cari posisi atau penyelenggara...",
+                              class: "min-w-0 grow",
+                              autocomplete: "off",
+                              aria: { label: "Cari posisi atau penyelenggara" },
+                              data: { action: "input->filter-form#search" } %>
+      </label>
+
+      <%= form.select :city_id,
+                      options_from_collection_for_select(@cities, :id, :name, params[:city_id]),
+                      { include_blank: "Semua kota" },
+                      class: "select select-bordered w-full bg-base-100",
+                      aria: { label: "Filter berdasarkan kota" },
+                      data: { action: "change->filter-form#submit" } %>
+
+      <%= form.select :education_level,
+                      options_for_select(@education_levels.map { |level| [ education_level_label(level), level ] }, params[:education_level]),
+                      { include_blank: "Semua pendidikan" },
+                      class: "select select-bordered w-full bg-base-100",
+                      aria: { label: "Filter berdasarkan pendidikan" },
+                      data: { action: "change->filter-form#submit" } %>
+
+      <%= form.select :sort,
+                      options_for_select([
+                        [ "Terbaru", "" ],
+                        [ "Terlama", "oldest" ],
+                        [ "Pelamar terbanyak", "applications_desc" ],
+                        [ "Kuota terbanyak", "quota_desc" ]
+                      ], params[:sort]),
+                      {},
+                      class: "select select-bordered w-full bg-base-100",
+                      aria: { label: "Urutkan lowongan" },
+                      data: { action: "change->filter-form#submit" } %>
+
+      <div class="flex gap-2 sm:col-span-2 lg:col-span-1">
+        <%= form.submit "Cari", class: "btn btn-secondary flex-1 lg:hidden" %>
+        <% if @filters_active %>
+          <%= link_to "Reset", vacancies_path, class: "btn btn-ghost flex-1 lg:flex-none", data: { turbo_frame: "_top" } %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%= turbo_frame_tag "vacancies_list" do %>
+      <div class="flex items-center justify-between border-b border-base-300 px-5 py-3 sm:px-6">
+        <p class="text-xs text-base-content/60"><%= number_with_delimiter(@pagy.count) %> lowongan ditemukan</p>
+        <span class="badge badge-ghost hidden sm:inline-flex">Halaman <%= @pagy.page %> dari <%= @pagy.pages %></span>
+      </div>
+
+      <% if @vacancies.any? %>
+        <div class="grid gap-4 p-4 md:grid-cols-2 sm:p-6">
+          <% @vacancies.each do |vacancy| %>
+            <article class="group flex min-w-0 flex-col rounded-2xl border border-base-300 bg-base-100 p-5 transition duration-200 hover:-translate-y-0.5 hover:border-secondary/40 hover:shadow-md">
+              <div class="flex min-w-0 items-start gap-3">
+                <div class="avatar shrink-0">
+                  <div class="flex size-12 items-center justify-center overflow-hidden rounded-xl border border-base-300 bg-base-200">
+                    <% if vacancy.organizer.logo_url.present? %>
+                      <%= image_tag vacancy.organizer.logo_url,
+                                    alt: "Logo #{vacancy.organizer.name}",
+                                    class: "size-full object-contain p-1.5",
+                                    loading: "lazy",
+                                    decoding: "async" %>
+                    <% else %>
+                      <span class="font-bold text-base-content/50" aria-hidden="true"><%= vacancy.organizer.name.first&.upcase %></span>
+                    <% end %>
+                  </div>
+                </div>
+
+                <div class="min-w-0 flex-1">
+                  <h3 class="line-clamp-2 font-bold leading-5 text-base-content"><%= vacancy.position_name %></h3>
+                  <p class="mt-1 truncate text-sm text-base-content/65"><%= vacancy.organizer.name %></p>
+                </div>
+              </div>
+
+              <div class="mt-4 flex flex-wrap gap-2">
+                <% vacancy.education_levels.each do |level| %>
+                  <span class="badge badge-secondary badge-outline badge-sm"><%= education_level_label(level) %></span>
+                <% end %>
+                <% if vacancy.primary_study_program %>
+                  <span class="badge badge-ghost badge-sm max-w-full truncate"><%= vacancy.primary_study_program.name %></span>
+                <% end %>
+              </div>
+
+              <% if vacancy.task_description.present? %>
+                <p class="mt-4 line-clamp-2 text-sm leading-6 text-base-content/65"><%= vacancy.task_description %></p>
+              <% end %>
+
+              <div class="mt-5 grid grid-cols-2 gap-3 border-t border-base-200 pt-4 text-sm">
+                <div>
+                  <p class="text-xs text-base-content/50">Lokasi</p>
+                  <p class="mt-0.5 truncate font-medium"><%= vacancy.city&.name || vacancy.organizer.city&.name || "Belum tersedia" %></p>
+                </div>
+                <div>
+                  <p class="text-xs text-base-content/50">Hari kerja</p>
+                  <p class="mt-0.5 font-medium"><%= vacancy.working_days_per_week ? "#{vacancy.working_days_per_week} hari/minggu" : "Belum tersedia" %></p>
+                </div>
+              </div>
+
+              <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex gap-2">
+                  <span class="badge badge-success badge-sm"><%= number_with_delimiter(vacancy.quantity_needed) %> kuota</span>
+                  <span class="badge badge-ghost badge-sm"><%= number_with_delimiter(vacancy.total_applications) %> pelamar</span>
+                </div>
+                <time class="text-xs text-base-content/50" datetime="<%= vacancy.published_at&.iso8601 %>">
+                  <%= vacancy.published_at&.strftime("%d/%m/%Y") %>
+                </time>
+              </div>
+            </article>
+          <% end %>
+        </div>
+
+        <footer class="flex flex-col items-center justify-between gap-3 border-t border-base-300 px-4 py-4 sm:flex-row sm:px-6">
+          <div class="order-2 text-center text-xs text-base-content/60 sm:order-1 sm:text-left"><%== @pagy.info_tag %></div>
+          <div class="order-1 sm:order-2" aria-label="Navigasi halaman"><%== @pagy.series_nav %></div>
+        </footer>
+      <% else %>
+        <div class="flex flex-col items-center px-6 py-16 text-center">
+          <div class="mb-4 flex size-14 items-center justify-center rounded-2xl bg-base-200 text-base-content/50">
+            <svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+              <rect x="3" y="7" width="18" height="13" rx="2" />
+              <path stroke-linecap="round" d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-base-content"><%= @filters_active ? "Lowongan tidak ditemukan" : "Belum ada lowongan aktif" %></h3>
+          <p class="mt-1 max-w-sm text-sm text-base-content/60">
+            <%= @filters_active ? "Coba ubah kata pencarian atau filter yang digunakan." : "Lowongan magang akan ditampilkan di sini setelah tersedia." %>
+          </p>
+          <% if @filters_active %>
+            <%= link_to "Reset pencarian", vacancies_path, class: "btn btn-secondary btn-sm mt-5", data: { turbo_frame: "_top" } %>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </section>
+</div>

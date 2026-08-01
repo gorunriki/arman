@@ -64,17 +64,20 @@ class VacancyImporter
           end
           study_program_ids << sp.id
         end
+        study_program_ids << primary_sp.id if primary_sp
 
         # 6. Vacancy (Upsert)
         vacancy = Vacancy.find_or_initialize_by(id: data["id"])
         vacancy.assign_attributes(
           organizer: organizer,
           city: city,
-          study_program: primary_sp,
+          primary_study_program: primary_sp,
           position_name: data["positionName"],
           quantity_needed: data["quantityNeeded"] || 0,
           approved_quantity: data["approvedQuantity"] || 0,
           total_applications: data["totalApplications"] || 0,
+          competitive_score: data["competitiveScore"],
+          opportunity_score: data["opportunityScore"],
           task_description: data["taskDescription"],
           education_levels: data["educationLevels"] || [],
           working_days_per_week: data["workingDaysPerWeek"],
@@ -87,7 +90,7 @@ class VacancyImporter
 
         vacancy.save!
         # Set relasi Many-to-Many untuk daftar studyPrograms
-        vacancy.study_program_ids = study_program_ids
+        vacancy.study_program_ids = study_program_ids.uniq
 
         success_count += 1
       end

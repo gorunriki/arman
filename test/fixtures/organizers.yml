@@ -1,23 +1,19 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  organizer_id: MyString
-  name: MyString
-  description: MyText
-  type_name: MyString
-  address: MyText
-  city_id: MyString
-  city_name: MyString
-  logo_url: MyString
-  total_active_vacancies: 1
+  name: Organizer One
+  description: Organizer pertama
+  organizable_type: Company
+  address: Jalan Satu
+  city: one
+  logo_url: https://example.com/one.png
+  vacancies_count: 1
 
 two:
-  organizer_id: MyString
-  name: MyString
-  description: MyText
-  type_name: MyString
-  address: MyText
-  city_id: MyString
-  city_name: MyString
-  logo_url: MyString
-  total_active_vacancies: 1
+  name: Organizer Two
+  description: Organizer kedua
+  organizable_type: Government
+  address: Jalan Dua
+  city: two
+  logo_url: https://example.com/two.png
+  vacancies_count: 1

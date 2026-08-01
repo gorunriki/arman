@@ -14,4 +14,5 @@ Rails.application.routes.draw do
   # root "posts#index"
 
   resources :organizers, only: [ :index ]
+  resources :vacancies, only: [ :index ]
 end

@@ -3,12 +3,14 @@
 one:
   organizer: one
   city: one
-  study_program: one
-  position_name: MyString
+  primary_study_program: one
+  position_name: Software Engineer
   quantity_needed: 1
   approved_quantity: 1
   total_applications: 1
   task_description: MyText
+  education_levels:
+    - bachelor
   working_days_per_week: 1
   latitude: 9.99
   longitude: 9.99
@@ -18,12 +20,14 @@ one:
 two:
   organizer: two
   city: two
-  study_program: two
-  position_name: MyString
+  primary_study_program: two
+  position_name: Nutrition Assistant
   quantity_needed: 1
   approved_quantity: 1
   total_applications: 1
   task_description: MyText
+  education_levels:
+    - diploma
   working_days_per_week: 1
   latitude: 9.99
   longitude: 9.99
