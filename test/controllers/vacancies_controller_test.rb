@@ -36,8 +36,18 @@ class VacanciesControllerTest < ActionDispatch::IntegrationTest
     assert_select "article", text: /Nutrition Assistant/
   end
 
+  test "filters vacancies by application count" do
+    vacancies(:two).update!(total_applications: 25)
+
+    get vacancies_url, params: { application_range: "11_50" }
+
+    assert_response :success
+    assert_select "article", count: 1
+    assert_select "article", text: /Nutrition Assistant/
+  end
+
   test "ignores invalid filter values" do
-    get vacancies_url, params: { city_id: "invalid", education_level: "invalid" }
+    get vacancies_url, params: { city_id: "invalid", education_level: "invalid", application_range: "invalid" }
 
     assert_response :success
     assert_select "article", count: Vacancy.count

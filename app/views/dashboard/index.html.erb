@@ -1,0 +1,131 @@
+<% content_for :title, "Statistik Arsip Magang" %>
+
+<div class="mx-auto min-w-0 w-full max-w-6xl pb-12" data-dashboard-charts>
+  <header class="overflow-hidden rounded-3xl bg-neutral text-neutral-content shadow-sm">
+    <div class="relative px-6 py-9 sm:px-10 sm:py-12">
+      <div class="pointer-events-none absolute -right-20 -top-28 size-80 rounded-full bg-primary/25 blur-2xl"></div>
+      <div class="pointer-events-none absolute -bottom-24 left-1/3 size-64 rounded-full bg-secondary/20 blur-2xl"></div>
+
+      <div class="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        <div class="max-w-3xl">
+          <div class="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-neutral-content/65">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V9M10 19V5M16 19v-7M22 19H2" />
+            </svg>
+            Ringkasan Data
+          </div>
+          <h1 class="text-3xl font-bold tracking-tight sm:text-5xl">Statistik Arsip Magang</h1>
+          <p class="mt-4 max-w-2xl text-sm leading-6 text-neutral-content/70 sm:text-base">
+            Gambaran umum penyelenggara, lowongan, kuota, dan pelamar berdasarkan data yang tersimpan dalam arsip.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <%= link_to "Jelajahi lowongan", vacancies_path, class: "btn btn-secondary btn-sm sm:btn-md" %>
+          <%= link_to "Lihat penyelenggara", organizers_path, class: "btn btn-ghost btn-sm border-neutral-content/20 sm:btn-md" %>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Statistik utama">
+    <% [
+      [ "Total penyelenggara", @stats[:organizers], "Instansi dan perusahaan yang tercatat", "text-primary" ],
+      [ "Total lowongan", @stats[:vacancies], "Seluruh rekaman lowongan magang", "text-secondary" ],
+      [ "Kuota diajukan", @stats[:requested_quota], "Akumulasi kebutuhan penyelenggara", "text-info" ],
+      [ "Kuota disetujui", @stats[:approved_quota], "Akumulasi kuota yang diberikan", "text-success" ],
+      [ "Pelamar tercatat", @stats[:applications], "Akumulasi pelamar pada data arsip", "text-warning" ],
+      [ "Kota tercakup", @stats[:covered_cities], "Kota yang memiliki arsip lowongan", "text-accent" ]
+    ].each do |label, value, description, color| %>
+      <article class="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm" data-stat-card>
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-sm font-medium text-base-content/60"><%= label %></p>
+            <p class="mt-2 text-3xl font-bold tracking-tight text-base-content"><%= number_with_delimiter(value) %></p>
+          </div>
+          <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-base-200 <%= color %>">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5v14" />
+            </svg>
+          </div>
+        </div>
+        <p class="mt-3 text-xs leading-5 text-base-content/50"><%= description %></p>
+      </article>
+    <% end %>
+  </section>
+
+  <section class="mt-8 grid min-w-0 gap-6 lg:grid-cols-2" aria-label="Visualisasi statistik">
+    <article class="min-w-0 overflow-hidden rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm sm:p-5" data-chart-card>
+      <div class="mb-5">
+        <h2 class="text-lg font-bold text-base-content">Jenis penyelenggara</h2>
+        <p class="mt-1 text-sm text-base-content/55">Komposisi seluruh penyelenggara</p>
+      </div>
+      <div class="h-72 min-w-0 sm:h-80">
+        <%= pie_chart @organizers_by_type,
+                      donut: true,
+                      height: "100%",
+                      colors: [ "#6366f1", "#22c55e", "#94a3b8" ],
+                      legend: "bottom",
+                      thousands: ".",
+                      library: { responsive: true, maintainAspectRatio: false },
+                      empty: "Belum ada data penyelenggara" %>
+      </div>
+    </article>
+
+    <article class="min-w-0 overflow-hidden rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm sm:p-5" data-chart-card>
+      <div class="mb-5">
+        <h2 class="text-lg font-bold text-base-content">Kuota menurut jenis penyelenggara</h2>
+        <p class="mt-1 text-sm text-base-content/55">Perbandingan kuota yang diajukan dan disetujui</p>
+      </div>
+      <div class="h-72 min-w-0 sm:h-80">
+        <%= column_chart @quota_by_type,
+                         height: "100%",
+                         colors: [ "#94a3b8", "#22c55e" ],
+                         legend: "bottom",
+                         thousands: ".",
+                         library: { responsive: true, maintainAspectRatio: false },
+                         empty: "Belum ada data kuota" %>
+      </div>
+    </article>
+
+    <article class="min-w-0 overflow-hidden rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm sm:p-5" data-chart-card>
+      <div class="mb-5">
+        <h2 class="text-lg font-bold text-base-content">Kota dengan arsip terbanyak</h2>
+        <p class="mt-1 text-sm text-base-content/55">Sepuluh kota berdasarkan jumlah lowongan</p>
+      </div>
+      <div class="h-80 min-w-0 sm:h-96">
+        <%= bar_chart @top_cities,
+                      height: "100%",
+                      colors: [ "#8b5cf6" ],
+                      legend: false,
+                      thousands: ".",
+                      library: { responsive: true, maintainAspectRatio: false },
+                      empty: "Belum ada data kota" %>
+      </div>
+    </article>
+
+    <article class="min-w-0 overflow-hidden rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm sm:p-5" data-chart-card>
+      <div class="mb-5">
+        <h2 class="text-lg font-bold text-base-content">Program studi teratas</h2>
+        <p class="mt-1 text-sm text-base-content/55">Program yang paling sering diterima</p>
+      </div>
+      <div class="h-80 min-w-0 sm:h-96">
+        <%= bar_chart @top_study_programs,
+                      height: "100%",
+                      colors: [ "#06b6d4" ],
+                      legend: false,
+                      thousands: ".",
+                      library: { responsive: true, maintainAspectRatio: false },
+                      empty: "Belum ada data program studi" %>
+      </div>
+    </article>
+  </section>
+
+  <aside class="alert mt-6 border border-info/20 bg-info/10 text-sm text-base-content/70" aria-label="Catatan statistik">
+    <svg class="size-5 shrink-0 text-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path stroke-linecap="round" d="M12 11v5M12 8h.01" />
+    </svg>
+    <span>Statistik merupakan agregasi data arsip. Angka kuota dan pelamar merepresentasikan kondisi saat informasi dihimpun, bukan kondisi terkini.</span>
+  </aside>
+</div>

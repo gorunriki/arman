@@ -80,6 +80,13 @@
                       aria: { label: "Filter berdasarkan jenis penyelenggara" },
                       data: { action: "change->filter-form#submit" } %>
 
+      <%= form.select :application_range,
+                      options_for_select(@application_ranges.map { |value, option| [ option[:label], value ] }, @selected_application_range),
+                      { include_blank: "Semua jumlah pelamar" },
+                      class: "select select-bordered w-full bg-base-100",
+                      aria: { label: "Filter berdasarkan jumlah pelamar" },
+                      data: { action: "change->filter-form#submit" } %>
+
       <%= form.select :sort,
                       options_for_select([
                         [ "Terbaru", "" ],
@@ -162,13 +169,22 @@
                 </div>
               </div>
 
-              <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <div class="flex gap-2">
-                  <span class="badge badge-outline badge-sm"><%= number_with_delimiter(vacancy.quantity_needed) %> diajukan</span>
-                  <span class="badge badge-success badge-sm"><%= number_with_delimiter(vacancy.approved_quantity) %> disetujui</span>
-                  <span class="badge badge-ghost badge-sm"><%= number_with_delimiter(vacancy.total_applications) %> pelamar tercatat</span>
-                </div>
-                <time class="text-xs text-base-content/50" datetime="<%= vacancy.published_at&.iso8601 %>">
+              <div class="mt-4">
+                <dl class="grid min-w-0 grid-cols-3 gap-2">
+                  <div class="flex min-w-0 flex-col rounded-xl border border-base-300 px-2 py-2.5">
+                    <dt class="order-2 mt-1 text-[0.6875rem] leading-4 text-base-content/55">Kuota diajukan</dt>
+                    <dd class="order-1 font-bold leading-none text-base-content"><%= number_with_delimiter(vacancy.quantity_needed) %></dd>
+                  </div>
+                  <div class="flex min-w-0 flex-col rounded-xl bg-success/15 px-2 py-2.5">
+                    <dt class="order-2 mt-1 text-[0.6875rem] leading-4 text-base-content/60">Kuota disetujui</dt>
+                    <dd class="order-1 font-bold leading-none text-success"><%= number_with_delimiter(vacancy.approved_quantity) %></dd>
+                  </div>
+                  <div class="flex min-w-0 flex-col rounded-xl bg-base-200 px-2 py-2.5">
+                    <dt class="order-2 mt-1 text-[0.6875rem] leading-4 text-base-content/55">Pelamar tercatat</dt>
+                    <dd class="order-1 font-bold leading-none text-base-content"><%= number_with_delimiter(vacancy.total_applications) %></dd>
+                  </div>
+                </dl>
+                <time class="mt-2 block text-right text-xs text-base-content/50" datetime="<%= vacancy.published_at&.iso8601 %>">
                   <%= vacancy.published_at&.strftime("%d/%m/%Y") %>
                 </time>
               </div>

@@ -1,6 +1,13 @@
 class VacanciesController < ApplicationController
   EDUCATION_LEVELS = %w[bachelor diploma profession].freeze
   ORGANIZER_TYPES = %w[government company].freeze
+  APPLICATION_RANGES = {
+    "none" => { label: "Belum ada pelamar", range: 0 },
+    "1_10" => { label: "1–10 pelamar", range: 1..10 },
+    "11_50" => { label: "11–50 pelamar", range: 11..50 },
+    "51_100" => { label: "51–100 pelamar", range: 51..100 },
+    "101_plus" => { label: "Lebih dari 100 pelamar", range: 101.. }
+  }.freeze
 
   def index
     vacancies = filtered_vacancies
@@ -12,8 +19,10 @@ class VacanciesController < ApplicationController
     @cities = City.where(id: Vacancy.where.not(city_id: nil).select(:city_id)).order(:name)
     @education_levels = EDUCATION_LEVELS
     @organizer_types = ORGANIZER_TYPES
+    @application_ranges = APPLICATION_RANGES
     @selected_organizer_type = organizer_type
-    @filters_active = search_term.present? || params[:city_id].present? || education_level.present? || organizer_type.present? || params[:sort].present?
+    @selected_application_range = application_range_key
+    @filters_active = search_term.present? || params[:city_id].present? || education_level.present? || organizer_type.present? || application_range_key.present? || params[:sort].present?
   end
 
   def show
@@ -42,6 +51,7 @@ class VacanciesController < ApplicationController
     scope = scope.where(city_id: params[:city_id]) if valid_uuid?(params[:city_id])
     scope = scope.where("?::varchar = ANY(vacancies.education_levels)", education_level) if education_level.present?
     scope = scope.joins(:organizer).where(organizers: { organizable_type: organizer_type }) if organizer_type.present?
+    scope = scope.where(total_applications: application_range) if application_range
     scope
   end
 
@@ -56,6 +66,15 @@ class VacanciesController < ApplicationController
   def organizer_type
     normalized_type = params[:organizer_type].to_s.downcase
     @organizer_type ||= ORGANIZER_TYPES.include?(normalized_type) ? normalized_type : nil
+  end
+
+  def application_range_key
+    value = params[:application_range].to_s
+    @application_range_key ||= APPLICATION_RANGES.key?(value) ? value : nil
+  end
+
+  def application_range
+    APPLICATION_RANGES.dig(application_range_key, :range) if application_range_key
   end
 
   def sort_order

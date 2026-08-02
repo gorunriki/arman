@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_01_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_02_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -88,6 +88,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_01_020000) do
     t.index ["position_name"], name: "index_vacancies_on_position_name_trigram", opclass: :gin_trgm_ops, using: :gin
     t.index ["primary_study_program_id"], name: "index_vacancies_on_primary_study_program_id"
     t.index ["published_at"], name: "index_vacancies_on_published_at"
+    t.index ["total_applications"], name: "index_vacancies_on_total_applications"
     t.check_constraint "approved_quantity >= 0", name: "approved_quantity_non_negative"
     t.check_constraint "competitive_score IS NULL OR competitive_score >= 0::numeric", name: "competitive_score_non_negative"
     t.check_constraint "latitude IS NULL OR latitude >= '-90'::integer::numeric AND latitude <= 90::numeric", name: "valid_latitude"
