@@ -20,6 +20,7 @@ class VacanciesController < ApplicationController
     @education_levels = EDUCATION_LEVELS
     @organizer_types = ORGANIZER_TYPES
     @application_ranges = APPLICATION_RANGES
+    @selected_education_level = education_level
     @selected_organizer_type = organizer_type
     @selected_application_range = application_range_key
     @filters_active = search_term.present? || params[:city_id].present? || education_level.present? || organizer_type.present? || application_range_key.present? || params[:sort].present?
@@ -27,6 +28,9 @@ class VacanciesController < ApplicationController
 
   def show
     @vacancy = Vacancy.preload(:city, :primary_study_program, :study_programs, organizer: :city).find(params[:id])
+    @other_study_programs = @vacancy.study_programs
+      .reject { |program| program.id == @vacancy.primary_study_program_id }
+      .sort_by(&:name)
     @related_vacancies = Vacancy
       .where(organizer_id: @vacancy.organizer_id)
       .where.not(id: @vacancy.id)

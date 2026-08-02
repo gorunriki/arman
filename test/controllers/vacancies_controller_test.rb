@@ -7,6 +7,10 @@ class VacanciesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "Arsip Lowongan Magang"
     assert_select "article", count: Vacancy.count
+    assert_select "form span", text: "Jenis penyelenggara"
+    assert_select "a", text: "Jelajahi lowongan", count: 0
+    assert_select "time", text: /Dipublikasikan/, minimum: 1
+    assert_select "footer", text: /Menampilkan 1–#{Vacancy.count} dari #{Vacancy.count} lowongan/
     assert_select "a[href=?]", vacancy_path(vacancies(:one)) do
       assert_select "article", count: 1
     end
@@ -18,6 +22,8 @@ class VacanciesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "article", count: 1
     assert_select "article", text: /Software Engineer/
+    assert_select "[aria-label='Filter aktif']", text: /Pencarian: Software/
+    assert_select "a[data-turbo-frame='_top']", text: "Reset semua", count: 1
   end
 
   test "filters vacancies by education level" do
@@ -61,9 +67,12 @@ class VacanciesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: vacancy.position_name
     assert_select "h2", text: "Deskripsi tugas"
-    assert_select "a[href=?]", organizer_path(vacancy.organizer) do
-      assert_select "h2", text: "Informasi penyelenggara"
-    end
+    assert_select "h2", text: "Informasi penyelenggara"
+    assert_select "a[href=?][aria-label=?]",
+                  organizer_path(vacancy.organizer),
+                  "Lihat #{vacancy.organizer.name} dan arsip lowongannya"
+    assert_select "p", text: "Kuota diberikan"
+    assert_select "a[href^='https://www.google.com/maps/search/']", text: /Buka lokasi di Google Maps/
   end
 
   test "returns not found for an unknown vacancy" do

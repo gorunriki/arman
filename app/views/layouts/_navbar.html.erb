@@ -26,11 +26,12 @@
       </details>
 
       <%= link_to root_path, class: "btn btn-ghost gap-2 px-2 text-lg sm:text-xl", aria: { label: "Arman — halaman utama" } do %>
-        <span class="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-content shadow-sm">
-          <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V9l8-5 8 5v10M8 19v-6h8v6M2 19h20" />
-          </svg>
-        </span>
+        <%= image_tag "android-chrome-192x192.png",
+                      alt: "",
+                      class: "size-9 rounded-xl object-contain shadow-sm",
+                      width: 36,
+                      height: 36,
+                      fetchpriority: "high" %>
         <span class="font-bold tracking-tight">Arman</span>
       <% end %>
     </div>
@@ -48,11 +49,13 @@
     </nav>
 
     <div class="navbar-end">
-      <%= link_to vacancies_path, class: "btn btn-primary btn-sm hidden sm:inline-flex" do %>
-        Jelajahi lowongan
-        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6" />
-        </svg>
+      <% unless controller_name == "vacancies" %>
+        <%= link_to vacancies_path, class: "btn btn-primary btn-sm hidden sm:inline-flex" do %>
+          Jelajahi lowongan
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6" />
+          </svg>
+        <% end %>
       <% end %>
     </div>
   </div>

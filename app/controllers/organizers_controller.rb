@@ -1,13 +1,15 @@
 class OrganizersController < ApplicationController
+  ORGANIZER_TYPES = %w[government company].freeze
+
   def index
     organizers = filtered_organizers
       .preload(:city)
       .order(sort_order)
 
-    @pagy, @organizers = pagy(organizers, limit: 10)
+    @pagy, @organizers = pagy(organizers, limit: 20)
     @total_organizers = Organizer.count
     @cities = City.where(id: Organizer.where.not(city_id: nil).select(:city_id)).order(:name)
-    @organizer_types = Organizer.where.not(organizable_type: [ nil, "" ]).distinct.order(:organizable_type).pluck(:organizable_type)
+    @organizer_types = ORGANIZER_TYPES
     @selected_organizer_type = normalized_organizer_type
     @filters_active = search_term.present? || params[:city_id].present? || normalized_organizer_type.present? || params[:sort].present?
   end
@@ -44,7 +46,8 @@ class OrganizersController < ApplicationController
   end
 
   def normalized_organizer_type
-    @normalized_organizer_type ||= params[:organizer_type].to_s.downcase.presence
+    normalized_type = params[:organizer_type].to_s.downcase
+    @normalized_organizer_type ||= ORGANIZER_TYPES.include?(normalized_type) ? normalized_type : nil
   end
 
   def valid_uuid?(value)

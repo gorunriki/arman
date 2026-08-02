@@ -1,5 +1,5 @@
 class DashboardController < ApplicationController
-  CACHE_KEY = "dashboard/statistics/v2"
+  CACHE_KEY = "dashboard/statistics/v4"
 
   def index
     data = Rails.cache.fetch(CACHE_KEY, expires_in: 1.hour) { dashboard_data }
@@ -9,6 +9,7 @@ class DashboardController < ApplicationController
     @quota_by_type = data.fetch(:quota_by_type)
     @top_cities = data.fetch(:top_cities)
     @top_study_programs = data.fetch(:top_study_programs)
+    @last_updated_at = data[:last_updated_at]
   end
 
   private
@@ -27,13 +28,15 @@ class DashboardController < ApplicationController
         vacancies: vacancy_count,
         requested_quota: requested_quota,
         approved_quota: approved_quota,
+        approval_rate: approval_rate(approved_quota, requested_quota),
         applications: applications,
         covered_cities: Vacancy.where.not(city_id: nil).distinct.count(:city_id)
       },
       organizers_by_type: organizers_by_type,
       quota_by_type: quota_by_type,
       top_cities: top_cities,
-      top_study_programs: top_study_programs
+      top_study_programs: top_study_programs,
+      last_updated_at: [ Vacancy.maximum(:updated_at), Organizer.maximum(:updated_at) ].compact.max
     }
   end
 
@@ -54,8 +57,8 @@ class DashboardController < ApplicationController
       )
 
     [
-      { name: "Diajukan", data: rows.to_h { |type, requested, _approved| [ organizer_type_name(type), requested ] } },
-      { name: "Disetujui", data: rows.to_h { |type, _requested, approved| [ organizer_type_name(type), approved ] } }
+      { name: "Kuota diajukan", data: rows.to_h { |type, requested, _approved| [ organizer_type_name(type), requested ] } },
+      { name: "Kuota diberikan", data: rows.to_h { |type, _requested, approved| [ organizer_type_name(type), approved ] } }
     ]
   end
 
@@ -82,5 +85,11 @@ class DashboardController < ApplicationController
       "government" => "Pemerintah",
       "company" => "Perusahaan"
     }.fetch(type.to_s.downcase, "Lainnya")
+  end
+
+  def approval_rate(approved, requested)
+    return 0.0 if requested.to_i.zero?
+
+    (approved.to_f / requested * 100).round(1)
   end
 end

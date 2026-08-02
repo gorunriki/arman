@@ -8,6 +8,9 @@ class OrganizersControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Daftar Penyelenggara Magang"
     assert_select "[data-organizer-row]", count: Organizer.count
     assert_select "[data-organizer-row]", text: /Organizer One/
+    assert_select "form span", text: "Jenis penyelenggara"
+    assert_select "[data-image-fallback-target='fallback']", minimum: 1
+    assert_select "footer", text: /Menampilkan 1–#{Organizer.count} dari #{Organizer.count} penyelenggara/
     assert_select "a[href=?]", organizer_path(organizers(:one)) do
       assert_select "[data-organizer-row]", count: 1
     end
@@ -19,6 +22,8 @@ class OrganizersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "[data-organizer-row]", count: 1
     assert_select "[data-organizer-row]", text: /Organizer One/
+    assert_select "[aria-label='Filter aktif']", text: /Pencarian: One/
+    assert_select "a[data-turbo-frame='_top']", text: "Reset semua", count: 1
   end
 
   test "filters organizers by city and type" do
@@ -47,6 +52,9 @@ class OrganizersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: organizer.name
     assert_select "[data-vacancy-card]", count: organizer.vacancies.count
+    assert_select "[data-controller='image-fallback']", count: 1
+    assert_select "a[href^='https://www.google.com/maps/search/']", text: /Buka di Google Maps/
+    assert_select "footer", text: /Menampilkan 1–#{organizer.vacancies.count} dari #{organizer.vacancies.count} lowongan/
   end
 
   test "returns not found for an unknown organizer" do

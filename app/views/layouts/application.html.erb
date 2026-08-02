@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="id" data-theme="arman">
   <head>
     <title><%= content_for(:title) || "Arman" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -14,20 +14,25 @@
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
+    <%= favicon_link_tag "favicon.ico", sizes: "any" %>
+    <%= favicon_link_tag "favicon-32x32.png", type: "image/png", sizes: "32x32" %>
+    <%= favicon_link_tag "favicon-16x16.png", type: "image/png", sizes: "16x16" %>
+    <%= tag.link rel: "apple-touch-icon", sizes: "180x180", href: asset_path("apple-touch-icon.png") %>
+    <%= tag.link rel: "icon", type: "image/png", sizes: "192x192", href: asset_path("android-chrome-192x192.png") %>
+    <meta name="theme-color" content="#172033">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="min-h-screen bg-base-200/40 text-base-content">
+  <body class="flex min-h-screen flex-col bg-base-200 text-base-content">
     <%= render "layouts/navbar" %>
 
-    <main class="mx-auto flex w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <main class="mx-auto flex w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <%= yield %>
     </main>
+
+    <%= render "layouts/footer" %>
   </body>
 </html>
