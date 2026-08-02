@@ -1,0 +1,254 @@
+<% content_for :title, "#{@vacancy.position_name} — Arsip Lowongan" %>
+
+<div class="mx-auto w-full max-w-6xl pb-12">
+  <nav class="mb-4" aria-label="Breadcrumb">
+    <%= link_to vacancies_path, class: "inline-flex items-center gap-2 text-sm font-medium text-base-content/60 transition hover:text-secondary" do %>
+      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6" />
+      </svg>
+      Kembali ke arsip lowongan
+    <% end %>
+  </nav>
+
+  <header class="overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
+    <div class="h-2 bg-secondary"></div>
+    <div class="p-6 sm:p-8">
+      <div class="flex flex-col gap-6 sm:flex-row sm:items-start">
+        <div class="avatar shrink-0">
+          <div class="flex size-16 items-center justify-center overflow-hidden rounded-2xl border border-base-300 bg-base-200 sm:size-20">
+            <% if @vacancy.organizer.logo_url.present? %>
+              <%= image_tag @vacancy.organizer.logo_url,
+                            alt: "Logo #{@vacancy.organizer.name}",
+                            class: "size-full object-contain p-2",
+                            decoding: "async" %>
+            <% else %>
+              <span class="text-2xl font-bold text-base-content/50" aria-hidden="true"><%= @vacancy.organizer.name.first&.upcase %></span>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <div class="mb-3 flex flex-wrap gap-2">
+            <span class="badge badge-secondary badge-outline">Arsip lowongan</span>
+            <% @vacancy.education_levels.each do |level| %>
+              <span class="badge badge-ghost"><%= education_level_label(level) %></span>
+            <% end %>
+          </div>
+          <h1 class="text-2xl font-bold leading-tight text-base-content sm:text-4xl"><%= @vacancy.position_name %></h1>
+          <p class="mt-3 text-base font-medium text-base-content/70 sm:text-lg"><%= @vacancy.organizer.name %></p>
+
+          <div class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-base-content/60">
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6-5.33 6-12a6 6 0 1 0-12 0c0 6.67 6 12 6 12Z" />
+                <circle cx="12" cy="9" r="2" />
+              </svg>
+              <%= @vacancy.city&.name || @vacancy.organizer.city&.name || "Lokasi belum tersedia" %>
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2" />
+                <path stroke-linecap="round" d="M8 3v4M16 3v4M3 10h18" />
+              </svg>
+              Dipublikasikan <%= @vacancy.published_at&.strftime("%d/%m/%Y") || "—" %>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-7 grid gap-3 sm:grid-cols-3">
+        <div class="rounded-2xl bg-base-200/70 p-4">
+          <p class="text-xs font-medium text-base-content/55">Kuota diajukan</p>
+          <p class="mt-1 text-2xl font-bold"><%= number_with_delimiter(@vacancy.quantity_needed) %></p>
+        </div>
+        <div class="rounded-2xl bg-success/10 p-4 text-success-content">
+          <p class="text-xs font-medium opacity-70">Kuota disetujui</p>
+          <p class="mt-1 text-2xl font-bold"><%= number_with_delimiter(@vacancy.approved_quantity) %></p>
+        </div>
+        <div class="rounded-2xl bg-base-200/70 p-4">
+          <p class="text-xs font-medium text-base-content/55">Pelamar tercatat</p>
+          <p class="mt-1 text-2xl font-bold"><%= number_with_delimiter(@vacancy.total_applications) %></p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+    <main class="space-y-6">
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
+        <h2 class="text-lg font-bold text-base-content">Deskripsi tugas</h2>
+        <% if @vacancy.task_description.present? %>
+          <div class="mt-4 text-sm leading-7 text-base-content/75 sm:text-base">
+            <%= simple_format(@vacancy.task_description, {}, wrapper_tag: "div") %>
+          </div>
+        <% else %>
+          <p class="mt-3 text-sm text-base-content/55">Deskripsi tugas tidak tersedia dalam arsip.</p>
+        <% end %>
+      </section>
+
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
+        <h2 class="text-lg font-bold text-base-content">Pendidikan dan program studi</h2>
+
+        <div class="mt-5 space-y-5">
+          <div>
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Jenjang pendidikan</h3>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <% if @vacancy.education_levels.any? %>
+                <% @vacancy.education_levels.each do |level| %>
+                  <span class="badge badge-secondary badge-outline"><%= education_level_label(level) %></span>
+                <% end %>
+              <% else %>
+                <span class="text-sm text-base-content/55">Tidak tercantum</span>
+              <% end %>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Program studi utama</h3>
+            <p class="mt-2 text-sm font-medium"><%= @vacancy.primary_study_program&.name || "Tidak tercantum" %></p>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Program studi yang diterima</h3>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <% if @vacancy.study_programs.any? %>
+                <% @vacancy.study_programs.sort_by(&:name).each do |study_program| %>
+                  <span class="badge badge-ghost"><%= study_program.name %></span>
+                <% end %>
+              <% else %>
+                <span class="text-sm text-base-content/55">Tidak tercantum</span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm">
+        <h2 class="text-lg font-bold text-base-content">Jadwal dan lokasi</h2>
+        <div class="mt-5 grid gap-5 sm:grid-cols-2">
+          <div>
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Hari kerja</h3>
+            <p class="mt-2 text-sm font-medium">
+              <%= @vacancy.working_days_per_week ? "#{@vacancy.working_days_per_week} hari per minggu" : "Tidak tercantum" %>
+            </p>
+          </div>
+          <div>
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Hari libur</h3>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <% if @vacancy.days_off.any? %>
+                <% @vacancy.days_off.each do |day| %>
+                  <span class="badge badge-outline"><%= day_label(day) %></span>
+                <% end %>
+              <% else %>
+                <span class="text-sm text-base-content/55">Tidak tercantum</span>
+              <% end %>
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Alamat</h3>
+            <p class="mt-2 text-sm leading-6 text-base-content/75">
+              <%= @vacancy.address.presence || @vacancy.organizer.address.presence || "Alamat tidak tersedia" %>
+            </p>
+            <% if @vacancy.latitude && @vacancy.longitude %>
+              <%= link_to "Lihat koordinat di peta",
+                          "https://www.openstreetmap.org/?mlat=#{@vacancy.latitude}&mlon=#{@vacancy.longitude}#map=15/#{@vacancy.latitude}/#{@vacancy.longitude}",
+                          class: "mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-secondary hover:underline",
+                          target: "_blank",
+                          rel: "noopener noreferrer" %>
+            <% end %>
+          </div>
+        </div>
+      </section>
+
+      <aside class="alert border border-info/20 bg-info/10 text-sm text-base-content/75" aria-label="Catatan arsip">
+        <svg class="size-5 shrink-0 text-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path stroke-linecap="round" d="M12 11v5M12 8h.01" />
+        </svg>
+        <span>Halaman ini merupakan arsip informasi. Jumlah kuota dan pelamar merepresentasikan data pada saat informasi dihimpun.</span>
+      </aside>
+    </main>
+
+    <%= link_to organizer_path(@vacancy.organizer),
+                class: "group block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 lg:sticky lg:top-6",
+                aria: { label: "Lihat #{@vacancy.organizer.name} dan arsip lowongannya" } do %>
+    <aside class="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm transition duration-200 group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-md">
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="text-lg font-bold text-base-content">Informasi penyelenggara</h2>
+        <svg class="size-5 shrink-0 text-base-content/30 transition group-hover:translate-x-0.5 group-hover:text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6" />
+        </svg>
+      </div>
+      <div class="mt-4 flex items-center gap-3">
+        <div class="avatar shrink-0">
+          <div class="flex size-12 items-center justify-center overflow-hidden rounded-xl border border-base-300 bg-base-200">
+            <% if @vacancy.organizer.logo_url.present? %>
+              <%= image_tag @vacancy.organizer.logo_url,
+                            alt: "Logo #{@vacancy.organizer.name}",
+                            class: "size-full object-contain p-1.5",
+                            loading: "lazy",
+                            decoding: "async" %>
+            <% else %>
+              <span class="font-bold text-base-content/50" aria-hidden="true"><%= @vacancy.organizer.name.first&.upcase %></span>
+            <% end %>
+          </div>
+        </div>
+        <div class="min-w-0">
+          <p class="font-semibold leading-5"><%= @vacancy.organizer.name %></p>
+          <span class="badge badge-ghost badge-sm mt-1"><%= organizer_type_label(@vacancy.organizer.organizable_type) %></span>
+        </div>
+      </div>
+
+      <% if @vacancy.organizer.description.present? %>
+        <p class="mt-4 line-clamp-5 text-sm leading-6 text-base-content/65"><%= @vacancy.organizer.description %></p>
+      <% end %>
+
+      <dl class="mt-5 space-y-4 border-t border-base-200 pt-5 text-sm">
+        <div>
+          <dt class="text-xs text-base-content/50">Lokasi</dt>
+          <dd class="mt-1 font-medium"><%= @vacancy.organizer.city&.name || "Tidak tersedia" %></dd>
+        </div>
+        <% if @vacancy.organizer.email.present? %>
+          <div>
+            <dt class="text-xs text-base-content/50">Email tercatat</dt>
+            <dd class="mt-1 break-all font-medium"><%= @vacancy.organizer.email %></dd>
+          </div>
+        <% end %>
+        <% if @vacancy.organizer.phone.present? %>
+          <div>
+            <dt class="text-xs text-base-content/50">Telepon tercatat</dt>
+            <dd class="mt-1 font-medium"><%= @vacancy.organizer.phone %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </aside>
+    <% end %>
+  </div>
+
+  <% if @related_vacancies.any? %>
+    <section class="mt-8" aria-labelledby="related-vacancies-title">
+      <div class="mb-4 flex items-end justify-between gap-4">
+        <div>
+          <h2 id="related-vacancies-title" class="text-xl font-bold text-base-content">Arsip lain dari penyelenggara ini</h2>
+          <p class="mt-1 text-sm text-base-content/55"><%= @vacancy.organizer.name %></p>
+        </div>
+        <%= link_to "Lihat semua", vacancies_path(q: @vacancy.organizer.name), class: "shrink-0 text-sm font-semibold text-secondary hover:underline" %>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <% @related_vacancies.each do |related| %>
+          <article class="flex flex-col rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm transition hover:border-secondary/40 hover:shadow-md">
+            <p class="text-xs text-base-content/50"><%= related.published_at&.strftime("%d/%m/%Y") || "Tanpa tanggal" %></p>
+            <h3 class="mt-2 line-clamp-2 font-bold leading-5">
+              <%= link_to related.position_name, vacancy_path(related), class: "hover:text-secondary" %>
+            </h3>
+            <p class="mt-2 truncate text-sm text-base-content/60"><%= related.city&.name || "Lokasi tidak tersedia" %></p>
+            <div class="mt-auto pt-4">
+              <span class="badge badge-ghost badge-sm"><%= number_with_delimiter(related.approved_quantity) %> kuota disetujui</span>
+            </div>
+          </article>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+</div>

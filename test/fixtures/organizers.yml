@@ -3,7 +3,7 @@
 one:
   name: Organizer One
   description: Organizer pertama
-  organizable_type: Company
+  organizable_type: company
   address: Jalan Satu
   city: one
   logo_url: https://example.com/one.png
@@ -12,7 +12,7 @@ one:
 two:
   name: Organizer Two
   description: Organizer kedua
-  organizable_type: Government
+  organizable_type: government
   address: Jalan Dua
   city: two
   logo_url: https://example.com/two.png

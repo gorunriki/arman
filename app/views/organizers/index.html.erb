@@ -16,7 +16,7 @@
           </div>
           <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Daftar Penyelenggara Magang</h1>
           <p class="mt-3 max-w-xl text-sm leading-6 opacity-80 sm:text-base">
-            Temukan instansi dan perusahaan penyedia kesempatan magang dari berbagai daerah.
+            Jelajahi instansi dan perusahaan yang tercatat dalam arsip lowongan magang.
           </p>
         </div>
 
@@ -68,7 +68,7 @@
                         data: { action: "change->filter-form#submit" } %>
 
         <%= form.select :organizer_type,
-                        options_for_select(@organizer_types, params[:organizer_type]),
+                        options_for_select(@organizer_types.map { |type| [ organizer_type_label(type), type ] }, @selected_organizer_type),
                         { include_blank: "Semua jenis" },
                         class: "select select-bordered w-full bg-base-100",
                         aria: { label: "Filter berdasarkan jenis penyelenggara" },
@@ -108,71 +108,63 @@
         </div>
 
       <% if @organizers.any? %>
-        <div class="overflow-x-auto">
-          <table class="table w-full">
-            <thead class="bg-base-200/70 text-xs uppercase tracking-wide text-base-content/60">
-              <tr>
-                <th scope="col" class="pl-5 sm:pl-6">Penyelenggara</th>
-                <th scope="col" class="hidden sm:table-cell">Lokasi</th>
-                <th scope="col" class="text-center">Lowongan aktif</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-base-200">
-              <% @organizers.each do |organizer| %>
-                <tr class="transition-colors hover:bg-base-200/50">
-                  <td class="pl-5 sm:pl-6">
-                    <div class="flex min-w-0 items-center gap-3 sm:gap-4">
-                      <div class="avatar shrink-0">
-                        <div class="flex size-12 items-center justify-center overflow-hidden rounded-xl border border-base-300 bg-base-200 sm:size-14">
-                          <% if organizer.logo_url.present? %>
-                            <%= image_tag organizer.logo_url,
-                                          alt: "Logo #{organizer.name}",
-                                          class: "size-full object-contain p-1.5",
-                                          loading: "lazy",
-                                          decoding: "async" %>
-                          <% else %>
-                            <span class="text-lg font-bold text-base-content/50" aria-hidden="true">
-                              <%= organizer.name.first&.upcase %>
-                            </span>
-                          <% end %>
-                        </div>
-                      </div>
+        <div aria-label="Daftar penyelenggara">
+          <div class="hidden grid-cols-[minmax(0,1fr)_minmax(10rem,0.55fr)_9rem] bg-base-200/70 px-6 py-3 text-xs font-semibold uppercase tracking-wide text-base-content/60 md:grid" aria-hidden="true">
+            <div>Penyelenggara</div>
+            <div>Lokasi</div>
+            <div class="text-center">Jumlah lowongan</div>
+          </div>
 
-                      <div class="min-w-0">
-                        <p class="truncate font-semibold text-base-content"><%= organizer.name %></p>
-                        <div class="mt-1 flex flex-wrap items-center gap-1.5">
-                          <span class="badge badge-ghost badge-sm max-w-full truncate">
-                            <%= organizer_type_label(organizer.organizable_type) %>
-                          </span>
-                          <span class="max-w-40 truncate text-xs text-base-content/60 sm:hidden">
-                            <%= organizer.city&.name || "Lokasi belum tersedia" %>
-                          </span>
-                        </div>
-                      </div>
+          <div class="grid gap-3 bg-base-200/30 p-3 md:block md:bg-transparent md:p-0">
+            <% @organizers.each do |organizer| %>
+              <%= link_to organizer_path(organizer),
+                          class: "group block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:rounded-none md:focus-visible:ring-inset md:focus-visible:ring-offset-0",
+                          aria: { label: "Lihat arsip lowongan #{organizer.name}" },
+                          data: { turbo_frame: "_top" } do %>
+              <article class="grid gap-4 rounded-xl border border-base-300 bg-base-100 p-4 transition-colors group-hover:border-primary/30 group-hover:bg-base-200/40 md:grid-cols-[minmax(0,1fr)_minmax(10rem,0.55fr)_9rem] md:items-center md:rounded-none md:border-x-0 md:border-t-0 md:px-6 md:py-4" data-organizer-row>
+                <div class="flex min-w-0 items-center gap-3 sm:gap-4">
+                  <div class="avatar shrink-0">
+                    <div class="flex size-12 items-center justify-center overflow-hidden rounded-xl border border-base-300 bg-base-200 sm:size-14">
+                      <% if organizer.logo_url.present? %>
+                        <%= image_tag organizer.logo_url,
+                                      alt: "Logo #{organizer.name}",
+                                      class: "size-full object-contain p-1.5",
+                                      loading: "lazy",
+                                      decoding: "async" %>
+                      <% else %>
+                        <span class="text-lg font-bold text-base-content/50" aria-hidden="true"><%= organizer.name.first&.upcase %></span>
+                      <% end %>
                     </div>
-                  </td>
+                  </div>
 
-                  <td class="hidden text-sm text-base-content/70 sm:table-cell">
-                    <div class="flex items-center gap-2">
-                      <svg class="size-4 shrink-0 text-base-content/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6-5.33 6-12a6 6 0 1 0-12 0c0 6.67 6 12 6 12Z" />
-                        <circle cx="12" cy="9" r="2" />
-                      </svg>
-                      <span><%= organizer.city&.name || "Belum tersedia" %></span>
-                    </div>
-                  </td>
+                  <div class="min-w-0">
+                    <p class="truncate font-semibold text-base-content"><%= organizer.name %></p>
+                    <span class="badge badge-ghost badge-sm mt-1 max-w-full truncate"><%= organizer_type_label(organizer.organizable_type) %></span>
+                  </div>
+                </div>
 
-                  <td class="text-center">
-                    <% active_vacancies = organizer.total_active_vacancies %>
-                    <span class="badge <%= active_vacancies.positive? ? "badge-success" : "badge-ghost" %> badge-sm whitespace-nowrap sm:badge-md">
-                      <%= number_with_delimiter(active_vacancies) %>
-                      <span class="hidden sm:inline">lowongan</span>
-                    </span>
-                  </td>
-                </tr>
+                <div class="flex min-w-0 items-center gap-2 text-sm text-base-content/70">
+                  <svg class="size-4 shrink-0 text-base-content/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6-5.33 6-12a6 6 0 1 0-12 0c0 6.67 6 12 6 12Z" />
+                    <circle cx="12" cy="9" r="2" />
+                  </svg>
+                  <span class="truncate"><span class="mr-1 text-xs text-base-content/45 md:hidden">Lokasi:</span><%= organizer.city&.name || "Belum tersedia" %></span>
+                </div>
+
+                <div class="flex items-center justify-between gap-3 md:justify-center">
+                  <span class="text-xs text-base-content/45 md:hidden">Jumlah lowongan</span>
+                  <% vacancies_count = organizer.total_vacancies %>
+                  <span class="badge <%= vacancies_count.positive? ? "badge-success" : "badge-ghost" %> whitespace-nowrap">
+                    <%= number_with_delimiter(vacancies_count) %> lowongan
+                  </span>
+                  <svg class="size-4 shrink-0 text-base-content/30 transition group-hover:translate-x-0.5 group-hover:text-primary md:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6" />
+                  </svg>
+                </div>
+              </article>
               <% end %>
-            </tbody>
-          </table>
+            <% end %>
+          </div>
         </div>
 
         <footer class="flex flex-col items-center justify-between gap-3 border-t border-base-300 px-4 py-4 sm:flex-row sm:px-6">

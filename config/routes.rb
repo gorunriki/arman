@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  get "organizers/index"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -13,6 +12,6 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
 
-  resources :organizers, only: [ :index ]
-  resources :vacancies, only: [ :index ]
+  resources :organizers, only: [ :index, :show ]
+  resources :vacancies, only: [ :index, :show ]
 end

@@ -64,7 +64,7 @@ ActiveRecord::Base.transaction do
         o.email = org_data['email']
         o.phone = org_data['phone']
         o.address = org_data['address']
-        o.organizable_type = org_data['organizableType']
+        o.organizable_type = org_data['organizableType']&.downcase
         o.description = org_data['description']
         o.logo_url = org_data['logoUrl']
       end

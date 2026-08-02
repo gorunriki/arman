@@ -6,4 +6,9 @@ class VacanciesHelperTest < ActionView::TestCase
     assert_equal "Diploma", education_level_label("diploma")
     assert_equal "Profesi", education_level_label("profession")
   end
+
+  test "translates days" do
+    assert_equal "Senin", day_label("monday")
+    assert_equal "Minggu", day_label("sunday")
+  end
 end

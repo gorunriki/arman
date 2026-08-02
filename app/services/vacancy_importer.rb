@@ -42,7 +42,7 @@ class VacancyImporter
           o.email = organizer_data["email"]
           o.phone = organizer_data["phone"]
           o.address = organizer_data["address"]
-          o.organizable_type = organizer_data["organizableType"]
+          o.organizable_type = organizer_data["organizableType"]&.downcase
           o.description = organizer_data["description"]
           o.logo_url = organizer_data["logoUrl"]
           o.city = city

@@ -1,0 +1,168 @@
+<% content_for :title, "#{@organizer.name} — Penyelenggara Magang" %>
+
+<div class="mx-auto w-full max-w-6xl pb-12">
+  <nav class="mb-4" aria-label="Breadcrumb">
+    <%= link_to organizers_path, class: "inline-flex items-center gap-2 text-sm font-medium text-base-content/60 transition hover:text-primary" do %>
+      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6" />
+      </svg>
+      Kembali ke daftar penyelenggara
+    <% end %>
+  </nav>
+
+  <header class="overflow-hidden rounded-3xl bg-primary text-primary-content shadow-sm">
+    <div class="relative p-6 sm:p-9">
+      <div class="pointer-events-none absolute -right-16 -top-20 size-64 rounded-full bg-primary-content/10"></div>
+      <div class="relative flex flex-col gap-6 sm:flex-row sm:items-center">
+        <div class="avatar shrink-0">
+          <div class="flex size-20 items-center justify-center overflow-hidden rounded-2xl border border-primary-content/20 bg-primary-content/95 sm:size-24">
+            <% if @organizer.logo_url.present? %>
+              <%= image_tag @organizer.logo_url,
+                            alt: "Logo #{@organizer.name}",
+                            class: "size-full object-contain p-2",
+                            decoding: "async" %>
+            <% else %>
+              <span class="text-3xl font-bold text-primary/60" aria-hidden="true"><%= @organizer.name.first&.upcase %></span>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <span class="badge border-primary-content/20 bg-primary-content/10 text-primary-content"><%= organizer_type_label(@organizer.organizable_type) %></span>
+          <h1 class="mt-3 text-3xl font-bold leading-tight sm:text-4xl"><%= @organizer.name %></h1>
+          <div class="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-primary-content/75">
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6-5.33 6-12a6 6 0 1 0-12 0c0 6.67 6 12 6 12Z" />
+                <circle cx="12" cy="9" r="2" />
+              </svg>
+              <%= @organizer.city&.name || "Lokasi belum tersedia" %>
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="3" y="7" width="18" height="13" rx="2" />
+                <path stroke-linecap="round" d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              <%= number_with_delimiter(@organizer.vacancies_count) %> arsip lowongan
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+    <main>
+      <section class="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm" aria-labelledby="organizer-vacancies-title">
+        <div class="border-b border-base-300 px-5 py-4 sm:px-6">
+          <h2 id="organizer-vacancies-title" class="text-lg font-bold text-base-content">Arsip lowongan</h2>
+          <p class="mt-1 text-sm text-base-content/55">Lowongan yang tercatat dari penyelenggara ini</p>
+        </div>
+
+        <%= turbo_frame_tag "organizer_vacancies" do %>
+          <div class="flex items-center justify-between border-b border-base-300 px-5 py-3 sm:px-6">
+            <p class="text-xs text-base-content/60"><%= number_with_delimiter(@pagy.count) %> lowongan ditemukan</p>
+            <span class="badge badge-ghost hidden sm:inline-flex">Halaman <%= @pagy.page %> dari <%= @pagy.pages %></span>
+          </div>
+
+          <% if @vacancies.any? %>
+            <div class="grid gap-3 bg-base-200/30 p-3 sm:grid-cols-2 sm:p-5">
+              <% @vacancies.each do |vacancy| %>
+                <%= link_to vacancy_path(vacancy),
+                            class: "group block rounded-xl border border-base-300 bg-base-100 p-4 transition hover:-translate-y-0.5 hover:border-secondary/40 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2",
+                            aria: { label: "Lihat detail arsip #{vacancy.position_name}" },
+                            data: { turbo_frame: "_top" } do %>
+                  <article class="flex h-full flex-col" data-vacancy-card>
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="line-clamp-2 font-bold leading-5 transition-colors group-hover:text-secondary"><%= vacancy.position_name %></h3>
+                      <svg class="size-4 shrink-0 text-base-content/30 transition group-hover:translate-x-0.5 group-hover:text-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6" />
+                      </svg>
+                    </div>
+
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <% vacancy.education_levels.each do |level| %>
+                        <span class="badge badge-secondary badge-outline badge-sm"><%= education_level_label(level) %></span>
+                      <% end %>
+                      <% if vacancy.primary_study_program %>
+                        <span class="badge badge-ghost badge-sm max-w-full truncate"><%= vacancy.primary_study_program.name %></span>
+                      <% end %>
+                    </div>
+
+                    <div class="mt-auto grid grid-cols-2 gap-3 pt-5 text-sm">
+                      <div>
+                        <p class="text-xs text-base-content/50">Lokasi</p>
+                        <p class="mt-1 truncate font-medium"><%= vacancy.city&.name || @organizer.city&.name || "Tidak tersedia" %></p>
+                      </div>
+                      <div>
+                        <p class="text-xs text-base-content/50">Kuota disetujui</p>
+                        <p class="mt-1 font-medium"><%= number_with_delimiter(vacancy.approved_quantity) %></p>
+                      </div>
+                    </div>
+
+                    <time class="mt-4 border-t border-base-200 pt-3 text-xs text-base-content/50" datetime="<%= vacancy.published_at&.iso8601 %>">
+                      Dipublikasikan <%= vacancy.published_at&.strftime("%d/%m/%Y") || "tanpa tanggal" %>
+                    </time>
+                  </article>
+                <% end %>
+              <% end %>
+            </div>
+
+            <footer class="flex flex-col items-center justify-between gap-3 border-t border-base-300 px-4 py-4 sm:flex-row sm:px-6">
+              <div class="order-2 text-center text-xs text-base-content/60 sm:order-1 sm:text-left"><%== @pagy.info_tag %></div>
+              <div class="order-1 sm:order-2" aria-label="Navigasi halaman"><%== @pagy.series_nav %></div>
+            </footer>
+          <% else %>
+            <div class="flex flex-col items-center px-6 py-14 text-center">
+              <div class="mb-4 flex size-12 items-center justify-center rounded-2xl bg-base-200 text-base-content/45">
+                <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                  <rect x="3" y="7" width="18" height="13" rx="2" />
+                  <path stroke-linecap="round" d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+              </div>
+              <h3 class="font-semibold">Belum ada arsip lowongan</h3>
+              <p class="mt-1 text-sm text-base-content/55">Tidak ada lowongan yang tercatat untuk penyelenggara ini.</p>
+            </div>
+          <% end %>
+        <% end %>
+      </section>
+    </main>
+
+    <aside class="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm lg:sticky lg:top-6">
+      <h2 class="text-lg font-bold text-base-content">Tentang penyelenggara</h2>
+
+      <% if @organizer.description.present? %>
+        <p class="mt-3 text-sm leading-6 text-base-content/65"><%= @organizer.description %></p>
+      <% else %>
+        <p class="mt-3 text-sm text-base-content/55">Deskripsi penyelenggara tidak tersedia dalam arsip.</p>
+      <% end %>
+
+      <dl class="mt-5 space-y-4 border-t border-base-200 pt-5 text-sm">
+        <div>
+          <dt class="text-xs text-base-content/50">Jenis</dt>
+          <dd class="mt-1 font-medium"><%= organizer_type_label(@organizer.organizable_type) %></dd>
+        </div>
+        <div>
+          <dt class="text-xs text-base-content/50">Alamat tercatat</dt>
+          <dd class="mt-1 leading-6"><%= @organizer.address.presence || "Tidak tersedia" %></dd>
+        </div>
+        <% if @organizer.email.present? %>
+          <div>
+            <dt class="text-xs text-base-content/50">Email tercatat</dt>
+            <dd class="mt-1 break-all font-medium"><%= @organizer.email %></dd>
+          </div>
+        <% end %>
+        <% if @organizer.phone.present? %>
+          <div>
+            <dt class="text-xs text-base-content/50">Telepon tercatat</dt>
+            <dd class="mt-1 font-medium"><%= @organizer.phone %></dd>
+          </div>
+        <% end %>
+      </dl>
+
+      <div class="mt-5 rounded-xl bg-info/10 p-3 text-xs leading-5 text-base-content/65">
+        Informasi ini merupakan bagian dari arsip dan dapat berbeda dari kondisi penyelenggara saat ini.
+      </div>
+    </aside>
+  </div>
+</div>

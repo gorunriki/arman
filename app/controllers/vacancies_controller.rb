@@ -1,5 +1,6 @@
 class VacanciesController < ApplicationController
   EDUCATION_LEVELS = %w[bachelor diploma profession].freeze
+  ORGANIZER_TYPES = %w[government company].freeze
 
   def index
     vacancies = filtered_vacancies
@@ -7,16 +8,28 @@ class VacanciesController < ApplicationController
       .order(sort_order)
 
     @pagy, @vacancies = pagy(vacancies, limit: 12)
-    @total_vacancies = Vacancy.active.count
-    @cities = City.where(id: Vacancy.active.where.not(city_id: nil).select(:city_id)).order(:name)
+    @total_vacancies = Vacancy.count
+    @cities = City.where(id: Vacancy.where.not(city_id: nil).select(:city_id)).order(:name)
     @education_levels = EDUCATION_LEVELS
-    @filters_active = search_term.present? || params[:city_id].present? || education_level.present? || params[:sort].present?
+    @organizer_types = ORGANIZER_TYPES
+    @selected_organizer_type = organizer_type
+    @filters_active = search_term.present? || params[:city_id].present? || education_level.present? || organizer_type.present? || params[:sort].present?
+  end
+
+  def show
+    @vacancy = Vacancy.preload(:city, :primary_study_program, :study_programs, organizer: :city).find(params[:id])
+    @related_vacancies = Vacancy
+      .where(organizer_id: @vacancy.organizer_id)
+      .where.not(id: @vacancy.id)
+      .preload(:city, :primary_study_program)
+      .order(published_at: :desc, position_name: :asc)
+      .limit(4)
   end
 
   private
 
   def filtered_vacancies
-    scope = Vacancy.active
+    scope = Vacancy.all
 
     if search_term.present?
       pattern = "%#{Vacancy.sanitize_sql_like(search_term)}%"
@@ -28,6 +41,7 @@ class VacanciesController < ApplicationController
 
     scope = scope.where(city_id: params[:city_id]) if valid_uuid?(params[:city_id])
     scope = scope.where("?::varchar = ANY(vacancies.education_levels)", education_level) if education_level.present?
+    scope = scope.joins(:organizer).where(organizers: { organizable_type: organizer_type }) if organizer_type.present?
     scope
   end
 
@@ -37,6 +51,11 @@ class VacanciesController < ApplicationController
 
   def education_level
     @education_level ||= EDUCATION_LEVELS.include?(params[:education_level]) ? params[:education_level] : nil
+  end
+
+  def organizer_type
+    normalized_type = params[:organizer_type].to_s.downcase
+    @organizer_type ||= ORGANIZER_TYPES.include?(normalized_type) ? normalized_type : nil
   end
 
   def sort_order
