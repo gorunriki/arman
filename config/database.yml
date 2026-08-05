@@ -37,9 +37,34 @@ production:
   primary:
     <<: *default
     database: arman_production
-    username: <%= ENV["MY_PROJECT_DATABASE_USER"] %>
-    password: <%= ENV["MY_PROJECT_DATABASE_PASSWORD"] %>
-    host: <%= ENV["MY_PROJECT_DATABASE_HOST"] %>
+    username: <%= ENV.fetch("DATABASE_USER", "arman") %>
+    password: <%= ENV["DATABASE_PASSWORD"] %>
+    host: <%= ENV.fetch("DATABASE_HOST", "arman-db") %>
+    port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
+  cache:
+    <<: *default
+    database: arman_production_cache
+    username: <%= ENV.fetch("DATABASE_USER", "arman") %>
+    password: <%= ENV["DATABASE_PASSWORD"] %>
+    host: <%= ENV.fetch("DATABASE_HOST", "arman-db") %>
+    port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *default
+    database: arman_production_queue
+    username: <%= ENV.fetch("DATABASE_USER", "arman") %>
+    password: <%= ENV["DATABASE_PASSWORD"] %>
+    host: <%= ENV.fetch("DATABASE_HOST", "arman-db") %>
+    port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *default
+    database: arman_production_cable
+    username: <%= ENV.fetch("DATABASE_USER", "arman") %>
+    password: <%= ENV["DATABASE_PASSWORD"] %>
+    host: <%= ENV.fetch("DATABASE_HOST", "arman-db") %>
+    port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
+    migrations_paths: db/cable_migrate
 #    database: storage/production.sqlite3
 #  cache:
 #    <<: *default

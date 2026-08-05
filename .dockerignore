@@ -36,6 +36,11 @@
 !/app/assets/builds/.keep
 /public/assets
 
+# Large source datasets are mounted only while running a production import.
+/all_lowongan*.json
+/sample_all_lowongan*.json
+/all_penyelenggara.json
+
 # Ignore CI service files.
 /.github
 
@@ -45,6 +50,7 @@
 
 # Ignore development files
 /.devcontainer
+/.ruby-lsp
 
 # Ignore Docker-related files
 /.dockerignore

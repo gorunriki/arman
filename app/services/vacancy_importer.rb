@@ -37,16 +37,18 @@ class VacancyImporter
 
         # 3. Organizer (Wajib)
         organizer_data = data["organizer"]
-        organizer = Organizer.find_or_create_by!(id: organizer_data["id"]) do |o|
-          o.name = organizer_data["name"]
-          o.email = organizer_data["email"]
-          o.phone = organizer_data["phone"]
-          o.address = organizer_data["address"]
-          o.organizable_type = organizer_data["organizableType"]&.downcase
-          o.description = organizer_data["description"]
-          o.logo_url = organizer_data["logoUrl"]
-          o.city = city
-        end
+        organizer = Organizer.find_or_initialize_by(id: organizer_data["id"])
+        organizer.assign_attributes(
+          name: organizer_data["name"],
+          email: organizer_data["email"],
+          phone: organizer_data["phone"],
+          address: organizer_data["address"],
+          organizable_type: organizer_data["organizableType"]&.downcase,
+          description: organizer_data["description"],
+          logo_url: organizer_data["logoUrl"],
+          city: city
+        )
+        organizer.save!
 
         # 4. Primary Study Program (opsional)
         primary_sp = nil

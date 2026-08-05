@@ -1,0 +1,3 @@
+CREATE DATABASE arman_production_cache;
+CREATE DATABASE arman_production_queue;
+CREATE DATABASE arman_production_cable;

@@ -33,6 +33,9 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+# Local deployment secrets (never commit their values).
+/.kamal/database_password
+
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
