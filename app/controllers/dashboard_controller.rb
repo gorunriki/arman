@@ -1,8 +1,8 @@
 class DashboardController < ApplicationController
-  CACHE_KEY = "dashboard/statistics/v4"
+  CACHE_KEY = "dashboard/statistics/v5"
 
   def index
-    data = Rails.cache.fetch(CACHE_KEY, expires_in: 1.hour) { dashboard_data }
+    data = Rails.cache.fetch("#{CACHE_KEY}/#{archive_period}", expires_in: 1.hour) { dashboard_data }
 
     @stats = data.fetch(:stats)
     @organizers_by_type = data.fetch(:organizers_by_type)
@@ -15,7 +15,7 @@ class DashboardController < ApplicationController
   private
 
   def dashboard_data
-    vacancy_count, requested_quota, approved_quota, applications = Vacancy.pick(
+    vacancy_count, requested_quota, approved_quota, applications = archive_vacancies.pick(
       Arel.sql("COUNT(*)"),
       Arel.sql("COALESCE(SUM(quantity_needed), 0)"),
       Arel.sql("COALESCE(SUM(approved_quantity), 0)"),
@@ -24,30 +24,30 @@ class DashboardController < ApplicationController
 
     {
       stats: {
-        organizers: Organizer.count,
+        organizers: archive_vacancies.distinct.count(:organizer_id),
         vacancies: vacancy_count,
         requested_quota: requested_quota,
         approved_quota: approved_quota,
         approval_rate: approval_rate(approved_quota, requested_quota),
         applications: applications,
-        covered_cities: Vacancy.where.not(city_id: nil).distinct.count(:city_id)
+        covered_cities: archive_vacancies.where.not(city_id: nil).distinct.count(:city_id)
       },
       organizers_by_type: organizers_by_type,
       quota_by_type: quota_by_type,
       top_cities: top_cities,
       top_study_programs: top_study_programs,
-      last_updated_at: [ Vacancy.maximum(:updated_at), Organizer.maximum(:updated_at) ].compact.max
+      last_updated_at: archive_vacancies.maximum(:updated_at)
     }
   end
 
   def organizers_by_type
-    Organizer.group(:organizable_type).count.to_h do |type, count|
+    Organizer.joins(:vacancies).merge(archive_vacancies).group(:organizable_type).distinct.count(:id).to_h do |type, count|
       [ organizer_type_name(type), count ]
     end
   end
 
   def quota_by_type
-    rows = Vacancy
+    rows = archive_vacancies
       .joins(:organizer)
       .group("organizers.organizable_type")
       .pluck(
@@ -63,7 +63,7 @@ class DashboardController < ApplicationController
   end
 
   def top_cities
-    Vacancy
+    archive_vacancies
       .joins(:city)
       .group("cities.name")
       .order(Arel.sql("COUNT(vacancies.id) DESC"))
@@ -74,6 +74,7 @@ class DashboardController < ApplicationController
   def top_study_programs
     StudyProgram
       .joins(:vacancies)
+      .merge(archive_vacancies)
       .group(:name)
       .order(Arel.sql("COUNT(vacancies.id) DESC"))
       .limit(10)

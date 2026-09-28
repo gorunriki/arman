@@ -1,6 +1,6 @@
 # app/services/vacancy_importer.rb
 class VacancyImporter
-  def self.import_from_json(file_path)
+  def self.import_from_json(file_path, expected_period: nil)
     unless File.exist?(file_path)
       puts "❌ File tidak ditemukan: #{file_path}"
       return
@@ -8,6 +8,13 @@ class VacancyImporter
 
     raw_data = File.read(file_path)
     vacancies_data = JSON.parse(raw_data)
+
+    if expected_period.present?
+      unexpected_periods = vacancies_data.filter_map do |data|
+        Time.zone.parse(data["publishedAt"])&.strftime("%Y-%m")
+      end.uniq - [ expected_period ]
+      raise ArgumentError, "Data di luar periode #{expected_period}: #{unexpected_periods.join(', ')}" if unexpected_periods.any?
+    end
 
     puts "🚀 Memulai impor #{vacancies_data.size} lowongan..."
 

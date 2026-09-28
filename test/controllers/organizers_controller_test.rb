@@ -62,4 +62,20 @@ class OrganizersControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
   end
+
+  test "only lists organizers with vacancies in selected period" do
+    vacancies(:two).update!(published_at: Time.zone.local(2026, 9, 3, 12))
+
+    get organizers_url, params: { period: "2026-07" }
+
+    assert_response :success
+    assert_select "[data-organizer-row]", text: /Organizer One/
+    assert_select "[data-organizer-row]", text: /Organizer Two/, count: 0
+
+    get organizers_url, params: { period: "2026-09" }
+
+    assert_response :success
+    assert_select "[data-organizer-row]", text: /Organizer Two/
+    assert_select "[data-organizer-row]", text: /Organizer One/, count: 0
+  end
 end

@@ -40,6 +40,7 @@
 /all_lowongan*.json
 /sample_all_lowongan*.json
 /all_penyelenggara.json
+/output
 
 # Ignore CI service files.
 /.github

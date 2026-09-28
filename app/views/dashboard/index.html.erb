@@ -24,7 +24,7 @@
           </div>
           <h1 class="text-3xl font-bold tracking-tight sm:text-5xl">Statistik Arsip Magang</h1>
           <p class="mt-4 max-w-2xl text-sm leading-6 text-neutral-content/70 sm:text-base">
-            Gambaran umum penyelenggara, lowongan, kuota, dan pelamar berdasarkan data yang tersimpan dalam arsip.
+            Gambaran umum penyelenggara, lowongan, kuota, dan pelamar untuk arsip <strong><%= archive_period_label %></strong>.
           </p>
           <% if @last_updated_at %>
             <p class="mt-3 flex items-center gap-2 text-xs text-neutral-content/55">
@@ -38,7 +38,7 @@
         </div>
 
         <div class="flex flex-wrap gap-3">
-          <%= link_to "Lihat penyelenggara", organizers_path, class: "btn btn-ghost btn-sm border-neutral-content/30 text-neutral-content hover:bg-neutral-content/10 sm:btn-md" %>
+          <%= link_to "Lihat penyelenggara", organizers_path(archive_query), class: "btn btn-ghost btn-sm border-neutral-content/30 text-neutral-content hover:bg-neutral-content/10 sm:btn-md" %>
         </div>
       </div>
     </div>

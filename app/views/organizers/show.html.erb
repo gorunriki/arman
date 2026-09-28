@@ -2,7 +2,7 @@
 
 <div class="mx-auto w-full max-w-6xl pb-8">
   <nav class="mb-4" aria-label="Breadcrumb">
-    <%= link_to organizers_path, class: "inline-flex items-center gap-2 text-sm font-medium text-base-content/60 transition hover:text-primary" do %>
+    <%= link_to organizers_path(archive_query), class: "inline-flex items-center gap-2 text-sm font-medium text-base-content/60 transition hover:text-primary" do %>
       <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6" />
       </svg>
@@ -45,7 +45,7 @@
                 <rect x="3" y="7" width="18" height="13" rx="2" />
                 <path stroke-linecap="round" d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
               </svg>
-              <%= number_with_delimiter(@organizer.vacancies_count) %> arsip lowongan
+              <%= number_with_delimiter(@pagy.count) %> arsip lowongan periode <%= archive_period_label %>
             </span>
           </div>
         </div>
@@ -70,7 +70,7 @@
           <% if @vacancies.any? %>
             <div class="grid gap-3 bg-base-200/30 p-3 sm:grid-cols-2 sm:p-5">
               <% @vacancies.each do |vacancy| %>
-                <%= link_to vacancy_path(vacancy),
+                <%= link_to vacancy_path(vacancy, archive_query),
                             class: "group block rounded-xl border border-base-300 bg-base-100 p-4 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                             aria: { label: "Lihat detail arsip #{vacancy.position_name}" },
                             data: { turbo_frame: "_top" } do %>
@@ -132,7 +132,7 @@
               </div>
               <h3 class="font-semibold">Belum ada arsip lowongan</h3>
               <p class="mt-1 text-sm text-base-content/55">Belum ada arsip lowongan dari penyelenggara ini.</p>
-              <%= link_to "Jelajahi semua lowongan", vacancies_path, class: "btn btn-primary btn-sm mt-5", data: { turbo_frame: "_top" } %>
+              <%= link_to "Jelajahi semua lowongan", vacancies_path(archive_query), class: "btn btn-primary btn-sm mt-5", data: { turbo_frame: "_top" } %>
             </div>
           <% end %>
         <% end %>

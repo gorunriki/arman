@@ -7,8 +7,10 @@ class OrganizersController < ApplicationController
       .order(sort_order)
 
     @pagy, @organizers = pagy(organizers, limit: 20)
-    @total_organizers = Organizer.count
-    @cities = City.where(id: Organizer.where.not(city_id: nil).select(:city_id)).order(:name)
+    period_organizers = Organizer.where(id: archive_vacancies.select(:organizer_id))
+    @total_organizers = period_organizers.count
+    @cities = City.where(id: period_organizers.where.not(city_id: nil).select(:city_id)).order(:name)
+    @period_vacancy_counts = archive_vacancies.where(organizer_id: @organizers.map(&:id)).group(:organizer_id).count
     @organizer_types = ORGANIZER_TYPES
     @selected_organizer_type = normalized_organizer_type
     @filters_active = search_term.present? || params[:city_id].present? || normalized_organizer_type.present? || params[:sort].present?
@@ -16,7 +18,7 @@ class OrganizersController < ApplicationController
 
   def show
     @organizer = Organizer.preload(:city).find(params[:id])
-    vacancies = @organizer.vacancies
+    vacancies = @organizer.vacancies.published_in(archive_period)
       .preload(:city, :primary_study_program)
       .order(published_at: :desc, position_name: :asc)
 
@@ -26,7 +28,7 @@ class OrganizersController < ApplicationController
   private
 
   def filtered_organizers
-    scope = Organizer.all
+    scope = Organizer.joins(:vacancies).merge(archive_vacancies).distinct
     scope = scope.where("organizers.name ILIKE ?", "%#{Organizer.sanitize_sql_like(search_term)}%") if search_term.present?
     scope = scope.where(city_id: params[:city_id]) if valid_uuid?(params[:city_id])
     scope = scope.where(organizable_type: normalized_organizer_type) if normalized_organizer_type.present?

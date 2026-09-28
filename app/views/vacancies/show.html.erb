@@ -2,7 +2,7 @@
 
 <div class="mx-auto w-full max-w-6xl pb-8">
   <nav class="mb-4" aria-label="Breadcrumb">
-    <%= link_to vacancies_path, class: "inline-flex items-center gap-2 text-sm font-medium text-base-content/60 transition hover:text-secondary" do %>
+    <%= link_to vacancies_path(archive_query), class: "inline-flex items-center gap-2 text-sm font-medium text-base-content/60 transition hover:text-secondary" do %>
       <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6" />
       </svg>
@@ -181,7 +181,7 @@
     </main>
 
     <aside class="group relative rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md lg:sticky lg:top-24">
-      <%= link_to "", organizer_path(@vacancy.organizer),
+      <%= link_to "", organizer_path(@vacancy.organizer, archive_query),
                   class: "absolute inset-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                   aria: { label: "Lihat #{@vacancy.organizer.name} dan arsip lowongannya" } %>
       <div class="pointer-events-none relative">
@@ -251,12 +251,12 @@
           <h2 id="related-vacancies-title" class="text-xl font-bold text-base-content">Arsip lain dari penyelenggara ini</h2>
           <p class="mt-1 text-sm text-base-content/55"><%= @vacancy.organizer.name %></p>
         </div>
-        <%= link_to "Lihat semua", vacancies_path(q: @vacancy.organizer.name), class: "shrink-0 text-sm font-semibold text-secondary hover:underline" %>
+        <%= link_to "Lihat semua", vacancies_path(archive_query.merge(q: @vacancy.organizer.name)), class: "shrink-0 text-sm font-semibold text-secondary hover:underline" %>
       </div>
 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <% @related_vacancies.each do |related| %>
-          <%= link_to vacancy_path(related),
+          <%= link_to vacancy_path(related, archive_query),
                       class: "group flex flex-col rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                       aria: { label: "Lihat arsip lowongan #{related.position_name}" } do %>
             <article class="flex h-full flex-col">

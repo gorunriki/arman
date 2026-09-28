@@ -1,0 +1,21 @@
+<% if archive_periods.many? %>
+  <% switch_path = case controller_name
+                   when "vacancies" then vacancies_path
+                   when "organizers" then organizers_path
+                   else root_path
+                   end %>
+  <%= form_with url: switch_path,
+                method: :get,
+                class: "flex items-center gap-2",
+                data: { controller: "filter-form" } do |form| %>
+    <%= form.label :period, "Periode", class: "sr-only" %>
+    <%= form.select :period,
+                    options_for_select(archive_periods.map { |period| [ archive_period_label(period), period ] }, archive_period),
+                    {},
+                    class: "select select-bordered select-sm max-w-36 bg-base-100",
+                    aria: { label: "Pilih periode arsip" },
+                    data: { action: "change->filter-form#submit" } %>
+  <% end %>
+<% elsif archive_period.present? %>
+  <span class="badge badge-outline"><%= archive_period_label %></span>
+<% end %>

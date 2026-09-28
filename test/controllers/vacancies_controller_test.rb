@@ -80,4 +80,40 @@ class VacanciesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
   end
+
+  test "switches vacancies by publication period" do
+    september = vacancies(:one).dup
+    september.id = SecureRandom.uuid
+    september.position_name = "September Internship"
+    september.published_at = Time.zone.local(2026, 9, 3, 12)
+    september.save!
+
+    get vacancies_url, params: { period: "2026-07" }
+
+    assert_response :success
+    assert_select "article", text: /Software Engineer/
+    assert_select "article", text: /September Internship/, count: 0
+    assert_select "select[aria-label='Pilih periode arsip'] option[selected]", text: "Juli 2026"
+
+    get vacancies_url, params: { period: "2026-09" }
+
+    assert_response :success
+    assert_select "article", text: /September Internship/
+    assert_select "article", text: /Software Engineer/, count: 0
+    assert_select "[aria-label='Keterangan kelengkapan arsip']", text: /tidak lengkap.*Maganghub direset/mi
+  end
+
+  test "defaults to the latest publication period" do
+    september = vacancies(:one).dup
+    september.id = SecureRandom.uuid
+    september.position_name = "Latest Internship"
+    september.published_at = Time.zone.local(2026, 9, 3, 12)
+    september.save!
+
+    get vacancies_url
+
+    assert_response :success
+    assert_select "article", text: /Latest Internship/
+    assert_select "article", text: /Software Engineer/, count: 0
+  end
 end

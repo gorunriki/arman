@@ -35,6 +35,7 @@
 
 # Local deployment secrets (never commit their values).
 /.kamal/database_password
+/output/
 
 
 /app/assets/builds/*

@@ -15,8 +15,8 @@ class VacanciesController < ApplicationController
       .order(sort_order)
 
     @pagy, @vacancies = pagy(vacancies, limit: 12)
-    @total_vacancies = Vacancy.count
-    @cities = City.where(id: Vacancy.where.not(city_id: nil).select(:city_id)).order(:name)
+    @total_vacancies = archive_vacancies.count
+    @cities = City.where(id: archive_vacancies.where.not(city_id: nil).select(:city_id)).order(:name)
     @education_levels = EDUCATION_LEVELS
     @organizer_types = ORGANIZER_TYPES
     @application_ranges = APPLICATION_RANGES
@@ -28,10 +28,11 @@ class VacanciesController < ApplicationController
 
   def show
     @vacancy = Vacancy.preload(:city, :primary_study_program, :study_programs, organizer: :city).find(params[:id])
+    @archive_period = @vacancy.archive_period
     @other_study_programs = @vacancy.study_programs
       .reject { |program| program.id == @vacancy.primary_study_program_id }
       .sort_by(&:name)
-    @related_vacancies = Vacancy
+    @related_vacancies = Vacancy.published_in(@archive_period)
       .where(organizer_id: @vacancy.organizer_id)
       .where.not(id: @vacancy.id)
       .preload(:city, :primary_study_program)
@@ -42,7 +43,7 @@ class VacanciesController < ApplicationController
   private
 
   def filtered_vacancies
-    scope = Vacancy.all
+    scope = archive_vacancies
 
     if search_term.present?
       pattern = "%#{Vacancy.sanitize_sql_like(search_term)}%"

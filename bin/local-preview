@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DATA_FILE="${DATA_FILE:-$PROJECT_DIR/output/vacancies.json}"
+PERIOD="${PERIOD:-2026-09}"
+
+cd "$PROJECT_DIR"
+
+if ! command -v docker >/dev/null 2>&1; then
+  echo "Docker tidak ditemukan. Jalankan skrip ini dari terminal host, bukan sandbox IDE."
+  exit 1
+fi
+
+if [[ ! -f "$DATA_FILE" ]]; then
+  echo "Dataset tidak ditemukan: $DATA_FILE"
+  exit 1
+fi
+
+echo "==> Menyalakan PostgreSQL development"
+docker compose -f compose.dev.yml up -d postgres
+
+for attempt in {1..30}; do
+  if docker exec postgres_db pg_isready -U riki >/dev/null 2>&1; then
+    break
+  fi
+
+  if [[ "$attempt" -eq 30 ]]; then
+    echo "PostgreSQL belum siap setelah 30 detik."
+    exit 1
+  fi
+
+  sleep 1
+done
+
+echo "==> Menyiapkan database development"
+bin/rails db:prepare
+
+echo "==> Memeriksa arsip $PERIOD"
+if DATA_FILE="$DATA_FILE" PERIOD="$PERIOD" bin/rails runner '
+  expected_ids = JSON.parse(File.read(ENV.fetch("DATA_FILE"))).filter_map { |row| row["id"] }.uniq
+  imported_ids = Vacancy.published_in(ENV.fetch("PERIOD")).where(id: expected_ids).count
+  puts "Sudah ada #{imported_ids} dari #{expected_ids.size} lowongan periode #{ENV.fetch("PERIOD")}."
+  exit(imported_ids == expected_ids.size ? 0 : 1)
+'; then
+  echo "==> Dataset sudah lengkap; impor dilewati"
+else
+  echo "==> Mengimpor dataset $PERIOD"
+  bin/rails data:import_vacancies FILE="$DATA_FILE" PERIOD="$PERIOD"
+fi
+
+echo "==> Menjalankan website di http://localhost:3000"
+exec bin/dev
