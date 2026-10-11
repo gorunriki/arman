@@ -43,7 +43,7 @@ gem "thruster", require: false
 gem "image_processing", "~> 1.2"
 
 # Pagination
-gem "pagy", "~> 43.6"
+gem "pagy", "~> 43.7"
 
 # Charts
 gem "chartkick", "~> 5.1"
